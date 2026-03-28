@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{--font-body:'Plus Jakarta Sans',system-ui,sans-serif;--font-display:'Instrument Serif',Georgia,serif;--font-mono:'JetBrains Mono','SF Mono',Consolas,monospace;--bg:#faf9f7;--surface:#ffffff;--surface2:#f3f1ee;--border:rgba(0,0,0,0.07);--border-bright:rgba(0,0,0,0.14);--text:#1a1614;--text-dim:#7a716a;--blue:#1e3a5f;--blue-dim:rgba(30,58,95,0.07);--gold:#b8860b;--gold-dim:rgba(184,134,11,0.07);--green:#2d6a4f;--green-dim:rgba(45,106,79,0.07);--rose:#9f1239;--rose-dim:rgba(159,18,57,0.06);--teal:#0f766e;--teal-dim:rgba(15,118,110,0.06)}
-  @media(prefers-color-scheme:dark){:root{--bg:#141210;--surface:#1e1b18;--surface2:#282420;--border:rgba(255,255,255,0.06);--border-bright:rgba(255,255,255,0.12);--text:#ede8e3;--text-dim:#9a928a;--blue:#7db4e0;--blue-dim:rgba(125,180,224,0.1);--gold:#d4a73a;--gold-dim:rgba(212,167,58,0.1);--green:#6ec79a;--green-dim:rgba(110,199,154,0.1);--rose:#f9a8c9;--rose-dim:rgba(249,168,201,0.08);--teal:#5eead4;--teal-dim:rgba(94,234,212,0.08)}}
+  html[data-theme="dark"]{--bg:#141210;--surface:#1e1b18;--surface2:#282420;--border:rgba(255,255,255,0.06);--border-bright:rgba(255,255,255,0.12);--text:#ede8e3;--text-dim:#9a928a;--blue:#7db4e0;--blue-dim:rgba(125,180,224,0.1);--gold:#d4a73a;--gold-dim:rgba(212,167,58,0.1);--green:#6ec79a;--green-dim:rgba(110,199,154,0.1);--rose:#f9a8c9;--rose-dim:rgba(249,168,201,0.08);--teal:#5eead4;--teal-dim:rgba(94,234,212,0.08)}
   *{margin:0;padding:0;box-sizing:border-box}body{background:var(--bg);background-image:radial-gradient(ellipse at 15% 0%,var(--teal-dim) 0%,transparent 45%),radial-gradient(ellipse at 85% 100%,var(--gold-dim) 0%,transparent 40%);color:var(--text);font-family:var(--font-body);min-height:100vh}
   @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}.anim{animation:fadeUp .5s ease-out both;animation-delay:calc(var(--i,0)*.08s)}@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important}}
   .nav{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;border-bottom:1px solid var(--border);background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(12px);position:sticky;top:0;z-index:100}.nav-brand{font-family:var(--font-display);font-size:20px;text-decoration:none;color:var(--text)}.nav-links{display:flex;gap:6px}.nav-link{font-size:12px;font-weight:500;text-decoration:none;padding:6px 14px;border-radius:6px;color:var(--text-dim);transition:background .15s,color .15s}.nav-link:hover{background:var(--surface2);color:var(--text)}
@@ -48,10 +48,11 @@
   .gi--pass .gi-icon{color:var(--green)}.gi--fail .gi-icon{color:var(--rose)}.gi--partial .gi-icon{color:var(--gold)}
 
   @media(max-width:700px){.nav{padding:12px 16px}.container{padding:32px 16px}.paths{grid-template-columns:repeat(2,1fr)}}
+.theme-toggle{background:none;border:1px solid var(--border-bright);border-radius:6px;cursor:pointer;padding:5px 8px;color:var(--text-dim);font-size:14px;line-height:1;transition:background .15s,color .15s;display:flex;align-items:center}.theme-toggle:hover{background:var(--surface2);color:var(--text)}
 </style>
 </head>
 <body>
-<nav class="nav"><a href="index.html" class="nav-brand">Cadence Skills</a><div class="nav-links"><a href="index.html" class="nav-link">Skills</a><a href="cadence-how-to-install.html" class="nav-link">Install</a><a href="how-skills-work.html" class="nav-link">Why Skills Work</a></div></nav>
+<nav class="nav"><a href="index.html" class="nav-brand">Cadence Skills</a><div class="nav-links"><a href="index.html" class="nav-link">Skills</a><a href="cadence-how-to-install.html" class="nav-link">Install</a><a href="how-skills-work.html" class="nav-link">Why Skills Work</a><button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme"><span class="theme-icon">☀️</span></button></div></nav>
 <div class="container">
   <a href="index.html" class="back anim" style="--i:0">&larr; All skills</a>
   <div class="hero anim" style="--i:1">
@@ -118,5 +119,6 @@
   </div>
 
 </div>
+<script>(function(){var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);window.toggleTheme=function(){var n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);localStorage.setItem('theme',n);document.querySelector('.theme-icon').textContent=n==='dark'?'☀️':'🌙'};document.querySelector('.theme-icon').textContent=t==='dark'?'☀️':'🌙'})()</script>
 <script>var V='v1.0',B='https://github.com/Cadence-Intelligence/skills/releases/download/'+V+'/';document.querySelectorAll('.skill-dl-btn').forEach(function(e){e.href=B+e.dataset.skill+'.skill'})</script>
 </body></html>

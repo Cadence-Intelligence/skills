@@ -21,8 +21,7 @@
     --rose: #9f1239; --rose-dim: rgba(159,18,57,0.06);
     --slate: #334155; --slate-dim: rgba(51,65,85,0.06);
   }
-  @media (prefers-color-scheme: dark) {
-    :root {
+  html[data-theme="dark"] {
       --bg: #141210; --surface: #1e1b18; --surface2: #282420; --surface-elevated: #302b26;
       --border: rgba(255,255,255,0.06); --border-bright: rgba(255,255,255,0.12);
       --text: #ede8e3; --text-dim: #9a928a;
@@ -31,7 +30,6 @@
       --green: #6ec79a; --green-dim: rgba(110,199,154,0.1);
       --rose: #f9a8c9; --rose-dim: rgba(249,168,201,0.08);
       --slate: #94a3b8; --slate-dim: rgba(148,163,184,0.08);
-    }
   }
   * { margin:0; padding:0; box-sizing:border-box; }
   body {
@@ -176,6 +174,7 @@
     .container { padding:32px 16px; }
     .skill-card { width:100%; }
   }
+.theme-toggle{background:none;border:1px solid var(--border-bright);border-radius:6px;cursor:pointer;padding:5px 8px;color:var(--text-dim);font-size:14px;line-height:1;transition:background .15s,color .15s;display:flex;align-items:center}.theme-toggle:hover{background:var(--surface2);color:var(--text)}
 </style>
 </head>
 <body>
@@ -186,6 +185,7 @@
     <a href="index.html" class="nav-link nav-link--active">Skills</a>
     <a href="cadence-how-to-install.html" class="nav-link">Install</a>
     <a href="how-skills-work.html" class="nav-link">Why Skills Work</a>
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme"><span class="theme-icon">☀️</span></button>
   </div>
 </nav>
 
@@ -292,6 +292,7 @@
 
   </div>
 
+  <script>(function(){var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);window.toggleTheme=function(){var n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);localStorage.setItem('theme',n);document.querySelector('.theme-icon').textContent=n==='dark'?'☀️':'🌙'};document.querySelector('.theme-icon').textContent=t==='dark'?'☀️':'🌙'})()</script>
   <script>
     var SKILL_VERSION = 'v1.0';
     var BASE_URL = 'https://github.com/Cadence-Intelligence/skills/releases/download/' + SKILL_VERSION + '/';
