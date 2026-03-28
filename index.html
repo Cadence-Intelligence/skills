@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cadence Skills</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+    --font-display: 'Instrument Serif', Georgia, serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+    --bg: #faf9f7; --surface: #ffffff; --surface2: #f3f1ee; --surface-elevated: #fffdfb;
+    --border: rgba(0,0,0,0.07); --border-bright: rgba(0,0,0,0.14);
+    --text: #1a1614; --text-dim: #7a716a;
+    --blue: #1e3a5f; --blue-dim: rgba(30,58,95,0.07);
+    --gold: #b8860b; --gold-dim: rgba(184,134,11,0.07);
+    --green: #2d6a4f; --green-dim: rgba(45,106,79,0.07);
+    --rose: #9f1239; --rose-dim: rgba(159,18,57,0.06);
+    --slate: #334155; --slate-dim: rgba(51,65,85,0.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141210; --surface: #1e1b18; --surface2: #282420; --surface-elevated: #302b26;
+      --border: rgba(255,255,255,0.06); --border-bright: rgba(255,255,255,0.12);
+      --text: #ede8e3; --text-dim: #9a928a;
+      --blue: #7db4e0; --blue-dim: rgba(125,180,224,0.1);
+      --gold: #d4a73a; --gold-dim: rgba(212,167,58,0.1);
+      --green: #6ec79a; --green-dim: rgba(110,199,154,0.1);
+      --rose: #f9a8c9; --rose-dim: rgba(249,168,201,0.08);
+      --slate: #94a3b8; --slate-dim: rgba(148,163,184,0.08);
+    }
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse at 15% 0%, var(--gold-dim) 0%, transparent 45%),
+      radial-gradient(ellipse at 85% 100%, var(--blue-dim) 0%, transparent 40%);
+    color: var(--text); font-family: var(--font-body); min-height: 100vh;
+  }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+  .anim { animation: fadeUp 0.5s ease-out both; animation-delay: calc(var(--i,0)*0.08s); }
+  @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:0.01ms!important; } }
+
+  /* ---- Nav ---- */
+  .nav {
+    display:flex; align-items:center; justify-content:space-between; padding:16px 32px;
+    border-bottom:1px solid var(--border); background: color-mix(in srgb, var(--bg) 85%, transparent);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    position:sticky; top:0; z-index:100;
+  }
+  .nav-brand { font-family:var(--font-display); font-size:20px; text-decoration:none; color:var(--text); }
+  .nav-links { display:flex; gap:6px; }
+  .nav-link {
+    font-size:12px; font-weight:500; text-decoration:none; padding:6px 14px; border-radius:6px;
+    color:var(--text-dim); transition: background 0.15s, color 0.15s;
+  }
+  .nav-link:hover { background:var(--surface2); color:var(--text); }
+  .nav-link--active { background:var(--blue-dim); color:var(--blue); font-weight:600; }
+
+  .container { max-width:1100px; margin:0 auto; padding: 48px 24px; }
+
+  /* ---- Hero ---- */
+  .hero { text-align:center; margin-bottom:20px; }
+  .hero h1 {
+    font-family:var(--font-display); font-size:clamp(40px,6vw,60px); font-weight:400;
+    letter-spacing:-1px; margin-bottom:16px; line-height:1.05;
+  }
+  .hero .tagline {
+    font-size:16px; color:var(--text-dim); max-width:500px; margin:0 auto 24px; line-height:1.6;
+  }
+  .hero-buttons { display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+  .btn {
+    font-family:var(--font-mono); font-size:12px; font-weight:500; text-decoration:none;
+    padding:10px 22px; border-radius:8px; transition:all 0.15s; display:inline-block;
+  }
+  .btn--primary { background:var(--text); color:var(--bg); border:1px solid var(--text); }
+  .btn--primary:hover { opacity:0.85; }
+  .btn--secondary { background:transparent; color:var(--text); border:1px solid var(--border-bright); }
+  .btn--secondary:hover { background:var(--surface2); }
+
+  .hero-sub { font-family:var(--font-mono); font-size:11px; color:var(--text-dim); margin-top:8px; }
+  .hero-sub a { color:var(--gold); text-decoration:none; border-bottom:1px solid var(--gold-dim); }
+
+  .divider { height:1px; background:var(--border); margin:40px 0; }
+
+  /* ---- Skill cards ---- */
+  .skills-grid {
+    display:flex; flex-wrap:wrap; gap:14px; margin-bottom:16px; justify-content:center;
+  }
+  .skill-card { width:calc(33.333% - 10px); }
+  .skill-card {
+    background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:20px;
+    position:relative; overflow:hidden; transition:border-color 0.2s, box-shadow 0.2s;
+  }
+  .skill-card:hover { border-color:var(--border-bright); box-shadow:0 4px 16px rgba(0,0,0,0.04); }
+  .skill-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; border-radius:14px 14px 0 0; }
+  .skill-card--gold::before{background:var(--gold)} .skill-card--blue::before{background:var(--blue)}
+  .skill-card--rose::before{background:var(--rose)} .skill-card--slate::before{background:var(--slate)}
+  .skill-card--green::before{background:var(--green)} .skill-card--teal::before{background:#2a7e79}
+  .skill-card--full { grid-column:1/-1; }
+
+  .skill-cat {
+    font-family:var(--font-mono); font-size:9px; font-weight:600; text-transform:uppercase;
+    letter-spacing:1.5px; display:flex; align-items:center; gap:5px; margin-bottom:8px;
+  }
+  .skill-cat .cd { width:5px; height:5px; border-radius:50%; }
+  .skill-card--gold .skill-cat{color:var(--gold)} .skill-card--gold .skill-cat .cd{background:var(--gold)}
+  .skill-card--blue .skill-cat{color:var(--blue)} .skill-card--blue .skill-cat .cd{background:var(--blue)}
+  .skill-card--rose .skill-cat{color:var(--rose)} .skill-card--rose .skill-cat .cd{background:var(--rose)}
+  .skill-card--slate .skill-cat{color:var(--slate)} .skill-card--slate .skill-cat .cd{background:var(--slate)}
+  .skill-card--green .skill-cat{color:var(--green)} .skill-card--green .skill-cat .cd{background:var(--green)}
+  .skill-card--teal .skill-cat{color:#2a7e79} .skill-card--teal .skill-cat .cd{background:#2a7e79}
+
+  .skill-card h2 { font-size:16px; font-weight:700; margin-bottom:6px; letter-spacing:-0.2px; }
+  .skill-card .desc { font-size:12px; line-height:1.6; color:var(--text-dim); margin-bottom:10px; }
+  .skill-card .activates { font-size:11px; line-height:1.5; margin-bottom:8px; }
+  .skill-card .activates strong { font-weight:600; color:var(--text); }
+  .skill-card .examples { display:flex; flex-direction:column; gap:2px; margin-bottom:8px; }
+  .skill-card .ex {
+    font-size:11px; color:var(--text-dim); font-style:italic; padding-left:10px; position:relative;
+  }
+  .skill-card .ex::before { content:'\201C'; position:absolute; left:0; color:var(--border-bright); font-weight:600; font-style:normal; }
+  .skill-card .features { list-style:none; font-size:10px; line-height:1.6; }
+  .skill-card .features li { padding-left:12px; position:relative; color:var(--text-dim); }
+  .skill-card .features li::before {
+    content:'>'; font-family:var(--font-mono); font-weight:600; position:absolute; left:0;
+    color:var(--border-bright); font-size:9px;
+  }
+  .skill-card code {
+    font-family:var(--font-mono); font-size:9px; padding:1px 4px; border-radius:3px;
+  }
+  .skill-card--gold code{background:var(--gold-dim);color:var(--gold)}
+  .skill-card--blue code{background:var(--blue-dim);color:var(--blue)}
+  .skill-card--rose code{background:var(--rose-dim);color:var(--rose)}
+  .skill-card--slate code{background:var(--slate-dim);color:var(--slate)}
+  .skill-card--green code{background:var(--green-dim);color:var(--green)}
+
+  .skill-card { display:flex; flex-direction:column; }
+  .skill-card .features { flex:1; }
+  .skill-actions { display:flex; align-items:center; gap:6px; margin-top:12px; align-self:flex-end; }
+
+  .skill-actions a {
+    display:inline-flex; align-items:center; justify-content:center;
+    height:30px; border-radius:7px; border:1px solid var(--border);
+    text-decoration:none; color:var(--text-dim); transition:all 0.2s;
+    font-family:var(--font-mono); font-size:10px; font-weight:500;
+  }
+
+  .skill-dl { width:30px; padding:0; }
+  .skill-dl:hover {
+    border-color:var(--gold); background:var(--gold-dim); color:var(--gold);
+    transform:translateY(-1px); box-shadow:0 3px 12px rgba(0,0,0,0.06);
+  }
+  .skill-dl:active { transform:translateY(0); }
+  .skill-dl svg {
+    width:14px; height:14px; stroke:currentColor; fill:none;
+    stroke-width:2; stroke-linecap:round; stroke-linejoin:round;
+    transition:transform 0.2s;
+  }
+  .skill-dl:hover svg { transform:translateY(1px); }
+
+  .skill-preview-link { padding:0 12px; }
+  .skill-preview-link:hover { border-color:var(--blue); color:var(--blue); background:var(--blue-dim); }
+
+  .footer {
+    text-align:center; font-size:11px; font-family:var(--font-mono); color:var(--text-dim);
+    margin-top:40px; padding-top:20px; border-top:1px solid var(--border);
+  }
+
+  @media (max-width:700px) {
+    .nav { padding:12px 16px; }
+    .container { padding:32px 16px; }
+    .skill-card { width:100%; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="nav-brand">Cadence Skills</a>
+  <div class="nav-links">
+    <a href="index.html" class="nav-link nav-link--active">Skills</a>
+    <a href="cadence-how-to-install.html" class="nav-link">Install</a>
+    <a href="how-skills-work.html" class="nav-link">Why Skills Work</a>
+  </div>
+</nav>
+
+<div class="container">
+
+  <div class="hero anim" style="--i:0">
+    <h1>Cadence Skills</h1>
+    <p class="tagline">Five skills that extend what Claude can do. Install once, they activate on their own. See what each one does below.</p>
+    <div class="hero-buttons">
+      <a href="https://github.com/Cadence-Intelligence/skills/releases/tag/v1.0" class="btn btn--primary">Download v1.0</a>
+      <a href="https://github.com/Cadence-Intelligence/skills/releases/tag/v1.0" class="btn btn--secondary">View on GitHub</a>
+      <a href="how-skills-work.html" class="btn btn--secondary">Why Skills Work</a>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="skills-grid">
+
+    <div class="skill-card skill-card--gold anim" style="--i:1">
+      <div class="skill-cat"><span class="cd"></span> Productivity</div>
+      <h2>Decision Engine Builder</h2>
+      <p class="desc">Pulls your decision-making out of your head and turns it into a scoring system you can automate.</p>
+      <div class="activates"><strong>Activates when:</strong> you want to prioritize, automate a recurring decision, or build a triage system.</div>
+      <div class="examples">
+        <span class="ex">Help me prioritize my task list</span>
+        <span class="ex">Build me a triage system</span>
+      </div>
+      <ul class="features">
+        <li>Quick Mode: 5 questions, 5 minutes, 80% of the value</li>
+        <li>Deep Mode: guilt curves, hidden rules, overflow patterns</li>
+        <li>Works with Todoist, Notion, Asana, Google Sheets, or plain text</li>
+      </ul>
+      <div class="skill-actions"><a class="skill-dl" data-skill="decision-engine-builder"><svg viewBox="0 0 16 16"><path d="M8 2v8M4 7l4 4 4-4"/><path d="M2 12v2h12v-2"/></svg></a><a class="skill-preview-link" href="preview-decision-engine-builder.html">Preview</a></div>
+    </div>
+
+    <div class="skill-card skill-card--blue anim" style="--i:2">
+      <div class="skill-cat"><span class="cd"></span> Productivity</div>
+      <h2>Advanced Skill Creator</h2>
+      <p class="desc">Build, test, and ship Claude skills without starting from scratch each time.</p>
+      <div class="activates"><strong>Activates when:</strong> you want to build a skill, turn a workflow into something reusable, or package and test an existing skill.</div>
+      <div class="examples">
+        <span class="ex">Build me a skill for this workflow</span>
+        <span class="ex">Turn this into something reusable</span>
+      </div>
+      <ul class="features">
+        <li>5 paths: Draft (5 min) to Architect (1-2 hrs)</li>
+        <li>Self-correcting loop: generate, grade, extract, iterate</li>
+        <li>Ships with <code>validate_skill.py</code> and <code>package_skill.py</code></li>
+      </ul>
+      <div class="skill-actions"><a class="skill-dl" data-skill="advanced-skill-creator"><svg viewBox="0 0 16 16"><path d="M8 2v8M4 7l4 4 4-4"/><path d="M2 12v2h12v-2"/></svg></a><a class="skill-preview-link" href="preview-advanced-skill-creator.html">Preview</a></div>
+    </div>
+
+    <div class="skill-card skill-card--rose anim" style="--i:3">
+      <div class="skill-cat"><span class="cd"></span> Security</div>
+      <h2>Check Skill Security</h2>
+      <p class="desc">Helps you verify that the skills you're installing are safe.</p>
+      <div class="activates"><strong>Activates when:</strong> you want to verify a skill is safe before installing, especially from an untrusted source.</div>
+      <div class="examples">
+        <span class="ex">Is this skill safe to install?</span>
+        <span class="ex">Audit this .skill file before I add it</span>
+      </div>
+      <ul class="features">
+        <li>Six audit phases: prompt injection, exfiltration, obfuscation, supply chain</li>
+        <li>Invisible Unicode injection detection</li>
+        <li>Severity levels: CLEAR / REVIEW / CAUTION / BLOCK</li>
+      </ul>
+      <div class="skill-actions"><a class="skill-dl" data-skill="check-skill-security"><svg viewBox="0 0 16 16"><path d="M8 2v8M4 7l4 4 4-4"/><path d="M2 12v2h12v-2"/></svg></a><a class="skill-preview-link" href="preview-check-skill-security.html">Preview</a></div>
+    </div>
+
+    <div class="skill-card skill-card--slate anim" style="--i:4">
+      <div class="skill-cat"><span class="cd"></span> Security</div>
+      <h2>Site Security Audit</h2>
+      <p class="desc">Scans your live deployed app for exposed credentials, missing auth, and misconfigurations.</p>
+      <div class="activates"><strong>Activates when:</strong> you want to audit a live site, check your deployed app, or find exposed credentials.</div>
+      <div class="examples">
+        <span class="ex">Audit this URL for security issues</span>
+        <span class="ex">Is my Vercel app secure?</span>
+      </div>
+      <ul class="features">
+        <li>Auto-detects: Vercel, Supabase, Cloudflare Workers, Firebase, Next.js</li>
+        <li>Seven phases: secrets in JS bundles, API auth, CRUD without auth</li>
+        <li>Stack-specific fix guides included</li>
+      </ul>
+      <div class="skill-actions"><a class="skill-dl" data-skill="site-security-audit"><svg viewBox="0 0 16 16"><path d="M8 2v8M4 7l4 4 4-4"/><path d="M2 12v2h12v-2"/></svg></a><a class="skill-preview-link" href="preview-site-security-audit.html">Preview</a></div>
+    </div>
+
+    <div class="skill-card skill-card--teal anim" style="--i:5">
+      <div class="skill-cat"><span class="cd"></span> Visualization</div>
+      <h2>CC-Viz</h2>
+      <p class="desc">Turns terminal output into styled HTML pages you can open in the browser. Diagrams, diff reviews, data tables, slide decks.</p>
+      <div class="activates"><strong>Activates when:</strong> you ask for a diagram, architecture overview, diff review, or are about to get a complex table in the terminal.</div>
+      <div class="examples">
+        <span class="ex">Draw a diagram of our authentication flow</span>
+        <span class="ex">Give me an architecture overview</span>
+        <span class="ex">/diff-review</span>
+      </div>
+      <ul class="features">
+        <li>11 diagram types, 6 slash commands</li>
+        <li>Proactive: auto-converts complex terminal tables to HTML without being asked</li>
+      </ul>
+      <div class="skill-actions"><a class="skill-dl" data-skill="cc-viz"><svg viewBox="0 0 16 16"><path d="M8 2v8M4 7l4 4 4-4"/><path d="M2 12v2h12v-2"/></svg></a><a class="skill-preview-link" href="preview-cc-viz.html">Preview</a></div>
+    </div>
+
+  </div>
+
+  <script>
+    var SKILL_VERSION = 'v1.0';
+    var BASE_URL = 'https://github.com/Cadence-Intelligence/skills/releases/download/' + SKILL_VERSION + '/';
+    document.querySelectorAll('.skill-dl').forEach(function(el) {
+      el.href = BASE_URL + el.dataset.skill + '.skill';
+    });
+  </script>
+
+  <div class="footer anim" style="--i:6">CC BY-NC 4.0, Cadence Intelligence, 2026</div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How Skills Work</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+    --font-display: 'Instrument Serif', Georgia, serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+    --bg: #faf9f7; --surface: #ffffff; --surface2: #f3f1ee; --surface-elevated: #fffdfb;
+    --border: rgba(0,0,0,0.07); --border-bright: rgba(0,0,0,0.14);
+    --text: #1a1614; --text-dim: #7a716a;
+    --blue: #1e3a5f; --blue-dim: rgba(30,58,95,0.07);
+    --gold: #b8860b; --gold-dim: rgba(184,134,11,0.07);
+    --green: #2d6a4f; --green-dim: rgba(45,106,79,0.07);
+    --rose: #9f1239; --rose-dim: rgba(159,18,57,0.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141210; --surface: #1e1b18; --surface2: #282420; --surface-elevated: #302b26;
+      --border: rgba(255,255,255,0.06); --border-bright: rgba(255,255,255,0.12);
+      --text: #ede8e3; --text-dim: #9a928a;
+      --blue: #7db4e0; --blue-dim: rgba(125,180,224,0.1);
+      --gold: #d4a73a; --gold-dim: rgba(212,167,58,0.1);
+      --green: #6ec79a; --green-dim: rgba(110,199,154,0.1);
+      --rose: #f9a8c9; --rose-dim: rgba(249,168,201,0.08);
+    }
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse at 15% 0%, var(--gold-dim) 0%, transparent 45%),
+      radial-gradient(ellipse at 85% 100%, var(--blue-dim) 0%, transparent 40%);
+    color: var(--text); font-family: var(--font-body); min-height: 100vh;
+  }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+  .anim { animation: fadeUp 0.5s ease-out both; animation-delay: calc(var(--i,0)*0.08s); }
+  @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:0.01ms!important; } }
+
+  .nav {
+    display:flex; align-items:center; justify-content:space-between; padding:16px 32px;
+    border-bottom:1px solid var(--border); background: color-mix(in srgb, var(--bg) 85%, transparent);
+    backdrop-filter: blur(12px); position:sticky; top:0; z-index:100;
+  }
+  .nav-brand { font-family:var(--font-display); font-size:20px; text-decoration:none; color:var(--text); }
+  .nav-links { display:flex; gap:6px; }
+  .nav-link { font-size:12px; font-weight:500; text-decoration:none; padding:6px 14px; border-radius:6px; color:var(--text-dim); transition:background 0.15s,color 0.15s; }
+  .nav-link:hover { background:var(--surface2); color:var(--text); }
+  .nav-link--active { background:var(--blue-dim); color:var(--blue); font-weight:600; }
+
+  .container { max-width:780px; margin:0 auto; padding:48px 24px; }
+  .section { margin-bottom:56px; }
+  .section h2 { font-size:22px; font-weight:700; margin-bottom:14px; }
+  .section p { font-size:14px; line-height:1.75; color:var(--text-dim); margin-bottom:14px; }
+  .section p strong { color:var(--text); font-weight:600; }
+
+  /* Hero */
+  .hero { margin-bottom:56px; }
+  .hero h1 {
+    font-family:var(--font-display); font-size:clamp(36px,5vw,48px); font-weight:400;
+    letter-spacing:-0.5px; margin-bottom:16px; line-height:1.1;
+  }
+  .hero .thesis {
+    font-size:18px; line-height:1.7; color:var(--text); margin-bottom:16px; max-width:640px;
+    font-weight:500;
+  }
+  .hero .sub {
+    font-size:14px; line-height:1.75; color:var(--text-dim); max-width:620px;
+  }
+
+  /* The gap visual */
+  .gap-visual {
+    background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    overflow:hidden; margin:24px 0;
+  }
+  .gap-top {
+    padding:24px 28px; border-bottom:1px solid var(--border);
+    text-align:center;
+  }
+  .gap-question {
+    font-size:20px; font-weight:600; color:var(--text); margin-bottom:4px;
+  }
+  .gap-words {
+    font-family:var(--font-mono); font-size:11px; color:var(--text-dim);
+  }
+  .gap-arrow {
+    text-align:center; padding:12px; color:var(--text-dim); font-size:12px;
+    font-family:var(--font-mono); background:var(--surface2); letter-spacing:0.05em; text-transform:uppercase; opacity:0.7;
+  }
+  .gap-bottom {
+    padding:20px 24px;
+  }
+  .gap-bottom-label {
+    font-family:var(--font-mono); font-size:10px; font-weight:600; text-transform:uppercase;
+    letter-spacing:1.5px; color:var(--gold); margin-bottom:12px;
+    display:flex; align-items:center; gap:6px;
+  }
+  .gap-bottom-label .gdot { width:6px; height:6px; border-radius:50%; background:var(--gold); }
+  .gap-checks {
+    display:grid; grid-template-columns:1fr 1fr; gap:6px;
+  }
+  .gap-check {
+    font-size:11px; padding:8px 10px; background:var(--surface2); border:1px solid var(--border);
+    border-radius:6px; display:flex; align-items:center; gap:6px; color:var(--text-dim);
+  }
+  .gap-check .gc-dot {
+    width:5px; height:5px; border-radius:50%; background:var(--green); flex-shrink:0;
+  }
+
+  /* What a skill carries */
+  .carries-grid { display:flex; flex-direction:column; gap:0; margin:24px 0; }
+  .carry {
+    background:var(--surface); border:1px solid var(--border); padding:18px 22px;
+    display:grid; grid-template-columns:140px 1fr; gap:16px; align-items:start;
+  }
+  .carry:first-child { border-radius:12px 12px 0 0; }
+  .carry:last-child { border-radius:0 0 12px 12px; }
+  .carry + .carry { border-top:none; }
+  .carry-label {
+    font-family:var(--font-mono); font-size:11px; font-weight:600; color:var(--gold);
+    padding-top:2px;
+  }
+  .carry-content { font-size:13px; line-height:1.6; color:var(--text-dim); }
+  .carry-content strong { color:var(--text); font-weight:600; }
+  .carry--highlight { background:var(--gold-dim); }
+
+  /* Before/After chat */
+  .comparison { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:24px 0; }
+  .comp-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; }
+  .comp-card--before { border-top:3px solid var(--rose); }
+  .comp-card--after { border-top:3px solid var(--green); }
+  .comp-label {
+    font-family:var(--font-mono); font-size:10px; font-weight:600; text-transform:uppercase;
+    letter-spacing:1.5px; margin-bottom:12px; display:flex; align-items:center; gap:6px;
+  }
+  .comp-card--before .comp-label { color:var(--rose); }
+  .comp-card--after .comp-label { color:var(--green); }
+  .comp-label .cdot { width:6px; height:6px; border-radius:50%; }
+  .comp-card--before .comp-label .cdot { background:var(--rose); }
+  .comp-card--after .comp-label .cdot { background:var(--green); }
+  .chat { display:flex; flex-direction:column; gap:8px; }
+  .chat-msg { padding:10px 14px; border-radius:10px; font-size:12px; line-height:1.6; max-width:92%; }
+  .chat-msg--user { background:var(--blue-dim); color:var(--blue); align-self:flex-end; border-bottom-right-radius:4px; }
+  .chat-msg--ai { background:var(--surface2); color:var(--text-dim); align-self:flex-start; border-bottom-left-radius:4px; }
+  .chat-msg--ai-skill {
+    background:var(--gold-dim); color:var(--text); align-self:flex-start; border-bottom-left-radius:4px;
+    border-left:2px solid var(--gold);
+  }
+  .chat-msg .skill-tag {
+    font-family:var(--font-mono); font-size:9px; font-weight:600; color:var(--gold);
+    text-transform:uppercase; letter-spacing:0.8px; display:block; margin-bottom:4px;
+  }
+
+  /* Capability cards */
+  .capability-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:20px 0; }
+  .cap-card {
+    background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:16px;
+    transition:border-color 0.15s;
+  }
+  .cap-card:hover { border-color:var(--border-bright); }
+  .cap-card h3 { font-size:14px; font-weight:700; margin-bottom:6px; }
+  .cap-card p { font-size:12px; color:var(--text-dim); line-height:1.6; margin:0; }
+  .cap-card .cap-ex {
+    font-family:var(--font-mono); font-size:10px; color:var(--gold); margin-top:8px;
+    padding-top:8px; border-top:1px solid var(--border);
+  }
+
+  /* Flow */
+  .flow { display:flex; flex-direction:column; align-items:center; gap:0; margin:24px 0; }
+  .flow-node {
+    background:var(--surface); border:1px solid var(--border); border-radius:10px;
+    padding:14px 24px; text-align:center; width:100%; max-width:440px;
+  }
+  .flow-node h3 { font-size:14px; font-weight:700; margin-bottom:4px; }
+  .flow-node p { font-size:12px; color:var(--text-dim); line-height:1.5; margin:0; }
+  .flow-node--active { border-color:var(--gold); background:var(--gold-dim); }
+  .flow-node--active h3 { color:var(--gold); }
+  .flow-arrow-down { color:var(--border-bright); font-size:18px; padding:6px 0; font-family:var(--font-mono); }
+
+  /* SKILL.md peek */
+  .skill-peek {
+    background:#0c0a09; border-radius:10px; overflow:hidden; margin:20px 0;
+    box-shadow:0 6px 28px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.04);
+  }
+  .skill-peek-chrome {
+    display:flex; align-items:center; justify-content:space-between; padding:8px 12px;
+    background:#1a1715; border-bottom:1px solid rgba(255,255,255,0.04);
+  }
+  .skill-peek-dots { display:flex; gap:5px; }
+  .skill-peek-dots span { width:8px; height:8px; border-radius:50%; }
+  .skill-peek-dots span:nth-child(1){background:#ef4444} .skill-peek-dots span:nth-child(2){background:#f59e0b} .skill-peek-dots span:nth-child(3){background:#22c55e}
+  .skill-peek-title { font-family:var(--font-mono); font-size:9px; color:#78716c; letter-spacing:0.8px; text-transform:uppercase; }
+  .skill-peek-body { padding:14px 0; font-family:var(--font-mono); font-size:11px; line-height:1.9; }
+  .sp-line { display:flex; padding:1px 16px; }
+  .sp-n { color:#44403c; min-width:26px; text-align:right; padding-right:14px; font-size:10px; user-select:none; flex-shrink:0; }
+  .sp-c { flex:1; }
+  .sp-key { color:#7db4e0; }
+  .sp-val { color:#d4a73a; }
+  .sp-comment { color:#57534e; }
+  .sp-hl { background:rgba(184,134,11,0.06); border-left:2px solid #b8860b; padding-left:14px; }
+
+  .callout {
+    background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--gold);
+    border-radius:0 10px 10px 0; padding:16px 22px; font-size:13px; line-height:1.6;
+    color:var(--text-dim); margin:20px 0;
+  }
+  .callout strong { color:var(--text); font-weight:600; }
+  code { font-family:var(--font-mono); font-size:10px; background:var(--blue-dim); color:var(--blue); padding:2px 5px; border-radius:3px; }
+
+  .cta { text-align:center; padding:40px 20px; }
+  .cta h2 { font-family:var(--font-display); font-size:28px; font-weight:400; margin-bottom:8px; }
+  .cta p { font-size:14px; color:var(--text-dim); margin-bottom:16px; }
+  .cta-buttons { display:flex; justify-content:center; gap:10px; flex-wrap:wrap; }
+  .btn {
+    font-family:var(--font-mono); font-size:12px; font-weight:500; text-decoration:none;
+    padding:10px 22px; border-radius:8px; transition:all 0.15s; display:inline-block;
+  }
+  .btn--primary { background:var(--text); color:var(--bg); border:1px solid var(--text); }
+  .btn--primary:hover { opacity:0.85; }
+  .btn--secondary { background:transparent; color:var(--text); border:1px solid var(--border-bright); }
+  .btn--secondary:hover { background:var(--surface2); }
+
+  /* Carousel */
+  .gap-example { display:none; }
+  .gap-example--active { display:block; }
+  @keyframes fadeIn { from{opacity:0;transform:translateX(8px)} to{opacity:1;transform:translateX(0)} }
+  .gap-example--active .gap-top,
+  .gap-example--active .gap-bottom { animation: fadeIn 0.3s ease-out; }
+
+  .carousel-nav {
+    display:flex; justify-content:center; gap:8px; padding:14px 0;
+    background:var(--surface);
+  }
+  .carousel-dot {
+    width:8px; height:8px; border-radius:50%; border:1.5px solid var(--border-bright);
+    background:transparent; cursor:pointer; padding:0; transition:all 0.2s;
+  }
+  .carousel-dot:hover { border-color:var(--gold); }
+  .carousel-dot--active { background:var(--gold); border-color:var(--gold); width:24px; border-radius:4px; }
+
+  @media (max-width:700px) {
+    .nav { padding:12px 16px; }
+    .container { padding:32px 16px; }
+    .comparison { grid-template-columns:1fr; }
+    .capability-grid { grid-template-columns:1fr; }
+    .gap-checks { grid-template-columns:1fr; }
+    .carry { grid-template-columns:1fr; }
+    .gap-tabs { flex-wrap:wrap; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="nav-brand">Cadence Skills</a>
+  <div class="nav-links">
+    <a href="index.html" class="nav-link">Skills</a>
+    <a href="cadence-how-to-install.html" class="nav-link">Install</a>
+    <a href="how-skills-work.html" class="nav-link nav-link--active">Why Skills Work</a>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- ======== HERO: The thesis ======== -->
+  <div class="hero anim" style="--i:0">
+    <h1>Your intent should match the result.</h1>
+    <p class="thesis">Skills make Claude respond to what you <em>mean</em>, not just what you say. Everything you know to ask for, everything you don't, and everything it takes to get it right.</p>
+    <p class="sub">When you ask Claude something, you're usually thinking of a much bigger picture than the words you type. You say five words. You mean fifty steps. A skill carries all fifty.</p>
+  </div>
+
+  <!-- ======== SECTION 1: The gap ======== -->
+  <div class="section anim" style="--i:1">
+    <h2>The gap between what you say and what you mean</h2>
+
+    <div class="gap-visual" id="gap-visual">
+      <div class="gap-example gap-example--active" data-gap="0">
+        <div class="gap-top">
+          <div class="gap-question">"Write me a LinkedIn post about AI agents"</div>
+          <div class="gap-words">8 words</div>
+        </div>
+        <div class="gap-arrow">what you actually mean &darr;</div>
+        <div class="gap-bottom">
+          <div class="gap-bottom-label"><span class="gdot"></span> What should actually happen</div>
+          <div class="gap-checks">
+            <div class="gap-check"><span class="gc-dot"></span> Research the topic across 3+ current sources</div>
+            <div class="gap-check"><span class="gc-dot"></span> Cross-reference findings for accuracy</div>
+            <div class="gap-check"><span class="gc-dot"></span> Load your writing voice and tone rules</div>
+            <div class="gap-check"><span class="gc-dot"></span> Check your past posts for consistency</div>
+            <div class="gap-check"><span class="gc-dot"></span> Draft using your hook style, not generic</div>
+            <div class="gap-check"><span class="gc-dot"></span> Structure for LinkedIn: short lines, no walls</div>
+            <div class="gap-check"><span class="gc-dot"></span> Include a specific insight, not a summary</div>
+            <div class="gap-check"><span class="gc-dot"></span> Add a CTA that matches your brand</div>
+            <div class="gap-check"><span class="gc-dot"></span> Flag anything that needs a source citation</div>
+            <div class="gap-check"><span class="gc-dot"></span> Return structured output: post, hashtags, alt text</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="gap-example" data-gap="1">
+        <div class="gap-top">
+          <div class="gap-question">"Set up everything for the new client"</div>
+          <div class="gap-words">7 words</div>
+        </div>
+        <div class="gap-arrow">what you actually mean &darr;</div>
+        <div class="gap-bottom">
+          <div class="gap-bottom-label"><span class="gdot"></span> What should actually happen</div>
+          <div class="gap-checks">
+            <div class="gap-check"><span class="gc-dot"></span> Create workspace from the client template</div>
+            <div class="gap-check"><span class="gc-dot"></span> Send intake form with the right questions</div>
+            <div class="gap-check"><span class="gc-dot"></span> Check if contract is countersigned first</div>
+            <div class="gap-check"><span class="gc-dot"></span> Schedule kickoff within 48 hours</div>
+            <div class="gap-check"><span class="gc-dot"></span> Assign team based on project type and size</div>
+            <div class="gap-check"><span class="gc-dot"></span> Set up billing in the correct tier</div>
+            <div class="gap-check"><span class="gc-dot"></span> Send welcome email using the branded template</div>
+            <div class="gap-check"><span class="gc-dot"></span> Add to the Monday standup roster</div>
+            <div class="gap-check"><span class="gc-dot"></span> Flag enterprise clients for VP introduction</div>
+            <div class="gap-check"><span class="gc-dot"></span> Log everything in CRM with the right stage</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="gap-example" data-gap="2">
+        <div class="gap-top">
+          <div class="gap-question">"Is my website secure?"</div>
+          <div class="gap-words">5 words</div>
+        </div>
+        <div class="gap-arrow">what you actually mean &darr;</div>
+        <div class="gap-bottom">
+          <div class="gap-bottom-label"><span class="gdot"></span> What should actually happen</div>
+          <div class="gap-checks">
+            <div class="gap-check"><span class="gc-dot"></span> Scan JS bundles for leaked API keys</div>
+            <div class="gap-check"><span class="gc-dot"></span> Test every API endpoint without auth</div>
+            <div class="gap-check"><span class="gc-dot"></span> Check for hardcoded passwords in source</div>
+            <div class="gap-check"><span class="gc-dot"></span> Test CRUD operations without login</div>
+            <div class="gap-check"><span class="gc-dot"></span> Verify security headers and CORS</div>
+            <div class="gap-check"><span class="gc-dot"></span> Detect your stack (Vercel, Supabase, etc.)</div>
+            <div class="gap-check"><span class="gc-dot"></span> Check database permissions and RLS</div>
+            <div class="gap-check"><span class="gc-dot"></span> Scan for SQL injection and XSS</div>
+            <div class="gap-check"><span class="gc-dot"></span> Audit dependencies for known vulns</div>
+            <div class="gap-check"><span class="gc-dot"></span> Generate a prioritized fix plan</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Carousel dots -->
+      <div class="carousel-nav">
+        <button class="carousel-dot carousel-dot--active" onclick="showGap(0)" aria-label="Example 1"></button>
+        <button class="carousel-dot" onclick="showGap(1)" aria-label="Example 2"></button>
+        <button class="carousel-dot" onclick="showGap(2)" aria-label="Example 3"></button>
+      </div>
+    </div>
+
+    <p>You didn't ask for any of those things specifically. You shouldn't have to. <strong>A skill covers the bases for what you truly mean</strong>, not just what you typed. It knows what the request actually requires because someone already figured out that list through real experience.</p>
+  </div>
+
+  <!-- ======== SECTION 2: What a skill carries ======== -->
+  <div class="section anim" style="--i:2">
+    <h2>What a skill carries</h2>
+    <p>A skill isn't just instructions. It's the full picture of what it takes to get the result you actually want:</p>
+
+    <div class="carries-grid">
+      <div class="carry">
+        <div class="carry-label">What you say</div>
+        <div class="carry-content">The trigger. <strong>"Help me write a proposal."</strong> The skill recognizes your intent and activates.</div>
+      </div>
+      <div class="carry carry--highlight">
+        <div class="carry-label">What you don't say</div>
+        <div class="carry-content">The questions you didn't know to ask. <strong>What's their budget timeline? Who else are they evaluating? What does their internal approval look like?</strong> These change the entire output. You didn't think to mention them. The skill did.</div>
+      </div>
+      <div class="carry">
+        <div class="carry-label">The rules</div>
+        <div class="carry-content">The consistent standards for what "good" looks like. <strong>Always include pricing. Lead with outcomes. Use the client's language, not ours.</strong> Applied every time, not just when you remember.</div>
+      </div>
+      <div class="carry">
+        <div class="carry-label">The process</div>
+        <div class="carry-content">The exact steps in the exact order. Not a general approach, <strong>the specific sequence that works</strong>, refined over real use. No steps skipped, nothing left to guesswork.</div>
+      </div>
+      <div class="carry carry--highlight">
+        <div class="carry-label">The hard lessons</div>
+        <div class="carry-content">Every hour you spent fine-tuning, every mistake you caught, every edge case you discovered. <strong>The proposal that stalled because nobody asked about approval chains. The deploy that broke because of a missing env var.</strong> Captured once, applied forever.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== SECTION 3: Where skills come from ======== -->
+  <div class="section anim" style="--i:3">
+    <h2>Perfect for a skill</h2>
+    <p>Every time you think "I wish Claude just knew this already," that's a skill waiting to be made:</p>
+
+    <div class="capability-grid">
+      <div class="cap-card">
+        <h3>Processes you've fine-tuned</h3>
+        <p>Spent hours getting Claude to handle something just right? The prompts, corrections, and iterations that finally produced the result you wanted. Capture it once, use it forever.</p>
+      </div>
+      <div class="cap-card">
+        <h3>Things you don't know how to ask</h3>
+        <p>You say "write a proposal." You mean fifty things. A skill written by someone who's closed a hundred deals carries those fifty things so you don't need to spell them out.</p>
+      </div>
+      <div class="cap-card">
+        <h3>Institutional knowledge</h3>
+        <p>How your team actually works: what tools, what sequence, who approves what, where the data lives. The stuff that takes new people months to absorb.</p>
+      </div>
+      <div class="cap-card">
+        <h3>Consistency you can't enforce manually</h3>
+        <p>Brand voice, formatting rules, quality standards, security checks. Applied automatically, every time, without someone reviewing the output.</p>
+      </div>
+      <div class="cap-card">
+        <h3>Debugging breakthroughs</h3>
+        <p>That issue you spent 4 hours on? The fix, the root cause, the symptoms to watch for. Next time Claude hits something similar, it goes straight to the answer.</p>
+      </div>
+      <div class="cap-card">
+        <h3>Workflows you repeat</h3>
+        <p>Client onboarding, weekly reports, vendor evaluations, hiring rubrics. Anything with steps that should happen the same way every time.</p>
+      </div>
+    </div>
+
+    <p><strong>Skills compound.</strong> Every hard session, every painful fix, every "oh THAT'S how this works" moment becomes permanent knowledge. Your past effort stops being a one-time win and starts working for you every time Claude runs.</p>
+  </div>
+
+  <!-- ======== SECTION 4: How they activate ======== -->
+  <div class="section anim" style="--i:4">
+    <h2>How do skills activate?</h2>
+    <p>Every skill has a short description. Claude reads it and matches against what you say. When there's a match, the skill loads automatically. You just talk normally.</p>
+
+    <div class="flow">
+      <div class="flow-node">
+        <h3>You say something</h3>
+        <p>"Is my Vercel app secure?"</p>
+      </div>
+      <div class="flow-arrow-down">&darr;</div>
+      <div class="flow-node">
+        <h3>Claude checks installed skills</h3>
+        <p>Compares your message against each skill's description</p>
+      </div>
+      <div class="flow-arrow-down">&darr;</div>
+      <div class="flow-node flow-node--active">
+        <h3>Best match loads</h3>
+        <p>The skill's full playbook activates: process, tools, checks, standards</p>
+      </div>
+      <div class="flow-arrow-down">&darr;</div>
+      <div class="flow-node">
+        <h3>Claude executes with full context</h3>
+        <p>Runs the complete process, covers the bases, delivers the result you actually wanted</p>
+      </div>
+    </div>
+
+    <p>You can also type <code>/skill-name</code> to call a skill directly, but most of the time you just talk and the right one shows up.</p>
+
+    <div class="callout">
+      <strong>Under the hood,</strong> each skill is a file called <code>SKILL.md</code>. The top has a description (what Claude reads to decide whether to load it) and the body has the playbook (the process, knowledge, scripts, and rules).
+    </div>
+
+    <div class="skill-peek">
+      <div class="skill-peek-chrome">
+        <div class="skill-peek-dots"><span></span><span></span><span></span></div>
+        <div class="skill-peek-title">SKILL.md</div>
+      </div>
+      <div class="skill-peek-body">
+        <div class="sp-line"><span class="sp-n">01</span><span class="sp-c"><span class="sp-comment">---</span></span></div>
+        <div class="sp-line sp-hl"><span class="sp-n">02</span><span class="sp-c"><span class="sp-key">name:</span> <span class="sp-val">site-security-audit</span></span></div>
+        <div class="sp-line sp-hl"><span class="sp-n">03</span><span class="sp-c"><span class="sp-key">description:</span> <span class="sp-val">Use when someone wants to check</span></span></div>
+        <div class="sp-line sp-hl"><span class="sp-n">04</span><span class="sp-c"><span class="sp-val">  if their deployed app is secure.</span></span></div>
+        <div class="sp-line"><span class="sp-n">05</span><span class="sp-c"><span class="sp-comment">---</span></span></div>
+        <div class="sp-line"><span class="sp-n">06</span><span class="sp-c"></span></div>
+        <div class="sp-line"><span class="sp-n">07</span><span class="sp-c"><span class="sp-comment"># Phase 1: Detect the stack</span></span></div>
+        <div class="sp-line"><span class="sp-n">08</span><span class="sp-c"><span class="sp-comment"># Phase 2: Scan for leaked secrets</span></span></div>
+        <div class="sp-line"><span class="sp-n">09</span><span class="sp-c"><span class="sp-comment"># Phase 3: Test auth on every endpoint</span></span></div>
+        <div class="sp-line"><span class="sp-n">10</span><span class="sp-c"><span class="sp-comment"># ... 7 phases, 50+ checks, fix guides</span></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta anim" style="--i:5">
+    <h2>Ready to try?</h2>
+    <p>Install takes under a minute. Skills activate on their own.</p>
+    <div class="cta-buttons">
+      <a href="cadence-how-to-install.html" class="btn btn--primary">Install guide</a>
+      <a href="https://github.com/Cadence-Intelligence/skills/releases/tag/v1.0" class="btn btn--secondary">Download v1.0</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function showGap(index) {
+  document.querySelectorAll('.carousel-dot').forEach(function(d, i) {
+    d.classList.toggle('carousel-dot--active', i === index);
+  });
+  document.querySelectorAll('.gap-example').forEach(function(e) {
+    e.classList.toggle('gap-example--active', parseInt(e.dataset.gap) === index);
+  });
+  currentGap = index;
+}
+
+var autoCycle = true;
+var currentGap = 0;
+document.querySelectorAll('.carousel-dot').forEach(function(d) {
+  d.addEventListener('click', function() { autoCycle = false; });
+});
+setInterval(function() {
+  if (!autoCycle) return;
+  currentGap = (currentGap + 1) % 3;
+  showGap(currentGap);
+}, 6000);
+</script>
+</body>
+</html>

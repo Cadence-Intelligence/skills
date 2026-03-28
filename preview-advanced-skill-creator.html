@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Advanced Skill Creator Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--font-body:'Plus Jakarta Sans',system-ui,sans-serif;--font-display:'Instrument Serif',Georgia,serif;--font-mono:'JetBrains Mono','SF Mono',Consolas,monospace;--bg:#faf9f7;--surface:#ffffff;--surface2:#f3f1ee;--border:rgba(0,0,0,0.07);--border-bright:rgba(0,0,0,0.14);--text:#1a1614;--text-dim:#7a716a;--blue:#1e3a5f;--blue-dim:rgba(30,58,95,0.07);--gold:#b8860b;--gold-dim:rgba(184,134,11,0.07);--green:#2d6a4f;--green-dim:rgba(45,106,79,0.07);--rose:#9f1239;--rose-dim:rgba(159,18,57,0.06);--teal:#0f766e;--teal-dim:rgba(15,118,110,0.06)}
+  @media(prefers-color-scheme:dark){:root{--bg:#141210;--surface:#1e1b18;--surface2:#282420;--border:rgba(255,255,255,0.06);--border-bright:rgba(255,255,255,0.12);--text:#ede8e3;--text-dim:#9a928a;--blue:#7db4e0;--blue-dim:rgba(125,180,224,0.1);--gold:#d4a73a;--gold-dim:rgba(212,167,58,0.1);--green:#6ec79a;--green-dim:rgba(110,199,154,0.1);--rose:#f9a8c9;--rose-dim:rgba(249,168,201,0.08);--teal:#5eead4;--teal-dim:rgba(94,234,212,0.08)}}
+  *{margin:0;padding:0;box-sizing:border-box}body{background:var(--bg);background-image:radial-gradient(ellipse at 15% 0%,var(--teal-dim) 0%,transparent 45%),radial-gradient(ellipse at 85% 100%,var(--gold-dim) 0%,transparent 40%);color:var(--text);font-family:var(--font-body);min-height:100vh}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}.anim{animation:fadeUp .5s ease-out both;animation-delay:calc(var(--i,0)*.08s)}@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important}}
+  .nav{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;border-bottom:1px solid var(--border);background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(12px);position:sticky;top:0;z-index:100}.nav-brand{font-family:var(--font-display);font-size:20px;text-decoration:none;color:var(--text)}.nav-links{display:flex;gap:6px}.nav-link{font-size:12px;font-weight:500;text-decoration:none;padding:6px 14px;border-radius:6px;color:var(--text-dim);transition:background .15s,color .15s}.nav-link:hover{background:var(--surface2);color:var(--text)}
+  .container{max-width:820px;margin:0 auto;padding:48px 24px}.back{font-family:var(--font-mono);font-size:11px;color:var(--text-dim);text-decoration:none;display:inline-flex;align-items:center;gap:4px;margin-bottom:24px}.back:hover{color:var(--text)}
+  .hero{margin-bottom:40px}.hero-cat{font-family:var(--font-mono);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:var(--blue);display:flex;align-items:center;gap:6px;margin-bottom:10px}.hero-cat .hd{width:6px;height:6px;border-radius:50%;background:var(--blue)}
+  .hero h1{font-family:var(--font-display);font-size:clamp(32px,4vw,42px);font-weight:400;margin-bottom:12px;line-height:1.15}.hero p{font-size:15px;line-height:1.7;color:var(--text-dim);max-width:580px;margin-bottom:16px}
+  .hero-buttons{display:flex;gap:8px;flex-wrap:wrap}.btn{font-family:var(--font-mono);font-size:11px;font-weight:500;text-decoration:none;padding:8px 18px;border-radius:7px;transition:all .15s;display:inline-block}.btn--primary{background:var(--text);color:var(--bg);border:1px solid var(--text)}.btn--primary:hover{opacity:.85}.btn--secondary{background:transparent;color:var(--text);border:1px solid var(--border-bright)}.btn--secondary:hover{background:var(--surface2)}
+  .divider{height:1px;background:var(--border);margin:40px 0}.section{margin-bottom:48px}.section h2{font-size:18px;font-weight:700;margin-bottom:16px}.section p{font-size:13px;line-height:1.7;color:var(--text-dim);margin-bottom:12px}
+
+  /* Paths table */
+  .paths{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:20px 0}
+  .path-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;transition:border-color .15s}
+  .path-card:hover{border-color:var(--border-bright)}
+  .path-card h3{font-size:12px;font-weight:700;margin-bottom:4px}
+  .path-card .path-time{font-family:var(--font-mono);font-size:10px;color:var(--text-dim)}
+
+  /* SKILL.md mockup */
+  .skill-file{background:#0c0a09;border-radius:12px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.15),0 0 0 1px rgba(0,0,0,0.04);margin:20px 0}
+  .sf-chrome{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#1a1715;border-bottom:1px solid rgba(255,255,255,0.04)}
+  .sf-dots{display:flex;gap:5px}.sf-dots span{width:8px;height:8px;border-radius:50%}.sf-dots span:nth-child(1){background:#ef4444}.sf-dots span:nth-child(2){background:#f59e0b}.sf-dots span:nth-child(3){background:#22c55e}
+  .sf-title{font-family:var(--font-mono);font-size:9px;color:#78716c;letter-spacing:.8px;text-transform:uppercase}
+  .sf-tag{font-family:var(--font-mono);font-size:8px;color:#22c55e;display:flex;align-items:center;gap:4px}.sf-tag::before{content:'';width:4px;height:4px;border-radius:50%;background:#22c55e}
+  .sf-body{padding:14px 0;font-family:var(--font-mono);font-size:11px;line-height:1.9}
+  .sl{display:flex;padding:1px 16px}.sl-n{color:#44403c;min-width:26px;text-align:right;padding-right:14px;font-size:10px;user-select:none;flex-shrink:0}.sl-c{flex:1}
+  .sl--hl{background:rgba(184,134,11,0.06);border-left:2px solid #b8860b;padding-left:14px}
+  .sk{color:#7db4e0}.sv{color:#d4a73a}.sc{color:#57534e}.sh{color:#e7e5e4;font-weight:600}
+
+  /* Grading cards */
+  .grade-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px 20px;margin:12px 0}
+  .grade-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .grade-title{font-size:13px;font-weight:700}
+  .grade-score{font-family:var(--font-mono);font-size:14px;font-weight:700}
+  .grade-items{display:flex;flex-direction:column;gap:4px}
+  .grade-item{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-dim)}
+  .gi-icon{font-family:var(--font-mono);font-size:12px;width:18px;text-align:center;flex-shrink:0}
+  .gi--pass .gi-icon{color:var(--green)}.gi--fail .gi-icon{color:var(--rose)}.gi--partial .gi-icon{color:var(--gold)}
+
+  @media(max-width:700px){.nav{padding:12px 16px}.container{padding:32px 16px}.paths{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<nav class="nav"><a href="index.html" class="nav-brand">Cadence Skills</a><div class="nav-links"><a href="index.html" class="nav-link">Skills</a><a href="cadence-how-to-install.html" class="nav-link">Install</a><a href="how-skills-work.html" class="nav-link">Why Skills Work</a></div></nav>
+<div class="container">
+  <a href="index.html" class="back anim" style="--i:0">&larr; All skills</a>
+  <div class="hero anim" style="--i:1">
+    <div class="hero-cat"><span class="hd"></span> Productivity</div>
+    <h1>Advanced Skill Creator</h1>
+    <p>Build, test, and ship Claude skills. Five paths from a 5-minute draft to a fully evaluated, packaged skill with self-correcting quality loops.</p>
+    <div class="hero-buttons"><a href="" class="btn btn--primary skill-dl-btn" data-skill="advanced-skill-creator">Download .skill</a><a href="cadence-how-to-install.html" class="btn btn--secondary">Install guide</a></div>
+  </div>
+  <div class="divider"></div>
+
+  <div class="section anim" style="--i:2">
+    <h2>Five paths, pick what fits</h2>
+    <div class="paths">
+      <div class="path-card"><h3>Draft</h3><div class="path-time">5 min</div></div>
+      <div class="path-card"><h3>Draft + Test</h3><div class="path-time">15 min</div></div>
+      <div class="path-card"><h3>Full Eval</h3><div class="path-time">30 min</div></div>
+      <div class="path-card"><h3>Architect</h3><div class="path-time">1-2 hrs</div></div>
+      <div class="path-card"><h3>Package</h3><div class="path-time">2 min</div></div>
+    </div>
+  </div>
+
+  <div class="section anim" style="--i:3">
+    <h2>What it generates</h2>
+    <p>Say "build me a skill for PDF form filling" and it produces a complete SKILL.md with frontmatter, workflow steps, scripts, and anti-patterns.</p>
+  </div>
+
+  <div class="skill-file anim" style="--i:4">
+    <div class="sf-chrome"><div class="sf-dots"><span></span><span></span><span></span></div><div class="sf-title">Generated SKILL.md</div><div class="sf-tag">valid</div></div>
+    <div class="sf-body">
+      <div class="sl"><span class="sl-n">01</span><span class="sl-c"><span class="sc">---</span></span></div>
+      <div class="sl sl--hl"><span class="sl-n">02</span><span class="sl-c"><span class="sk">name:</span> <span class="sv">pdf-form-filler</span></span></div>
+      <div class="sl sl--hl"><span class="sl-n">03</span><span class="sl-c"><span class="sk">description:</span> <span class="sv">Extract form fields from PDFs, fill them</span></span></div>
+      <div class="sl sl--hl"><span class="sl-n">04</span><span class="sl-c"><span class="sv">  with provided data, and generate completed files.</span></span></div>
+      <div class="sl"><span class="sl-n">05</span><span class="sl-c"><span class="sc">---</span></span></div>
+      <div class="sl"><span class="sl-n">06</span><span class="sl-c"></span></div>
+      <div class="sl"><span class="sl-n">07</span><span class="sl-c"><span class="sh"># PDF Form Filler</span></span></div>
+      <div class="sl"><span class="sl-n">08</span><span class="sl-c"></span></div>
+      <div class="sl"><span class="sl-n">09</span><span class="sl-c"><span class="sc">## Workflow</span></span></div>
+      <div class="sl"><span class="sl-n">10</span><span class="sl-c"><span class="sv">- [ ] Step 1: Analyze form (scripts/analyze_form.py)</span></span></div>
+      <div class="sl"><span class="sl-n">11</span><span class="sl-c"><span class="sv">- [ ] Step 2: Create field mapping (fields.json)</span></span></div>
+      <div class="sl"><span class="sl-n">12</span><span class="sl-c"><span class="sv">- [ ] Step 3: Validate (scripts/validate.py)</span></span></div>
+      <div class="sl"><span class="sl-n">13</span><span class="sl-c"><span class="sv">- [ ] Step 4: Fill forms (scripts/fill.py)</span></span></div>
+      <div class="sl"><span class="sl-n">14</span><span class="sl-c"><span class="sv">- [ ] Step 5: Verify output</span></span></div>
+      <div class="sl"><span class="sl-n">15</span><span class="sl-c"></span></div>
+      <div class="sl"><span class="sl-n">16</span><span class="sl-c"><span class="sc">## Anti-Patterns</span></span></div>
+      <div class="sl"><span class="sl-n">17</span><span class="sl-c"><span class="sv">- Don't skip validation step...</span></span></div>
+    </div>
+  </div>
+
+  <div class="section anim" style="--i:5">
+    <h2>Quality grading</h2>
+    <p>On the Full Eval or Architect path, the skill grades its own output against a rubric before shipping.</p>
+  </div>
+
+  <div class="grade-card anim" style="--i:6">
+    <div class="grade-header"><span class="grade-title">pdf-form-filler: test case "Tax 1040"</span><span class="grade-score" style="color:var(--green)">4/5</span></div>
+    <div class="grade-items">
+      <div class="grade-item gi--pass"><span class="gi-icon">&#10003;</span> All form fields identified and mapped (12/12)</div>
+      <div class="grade-item gi--pass"><span class="gi-icon">&#10003;</span> Data matches field types (text, date, checkbox)</div>
+      <div class="grade-item gi--partial"><span class="gi-icon">&#9888;</span> Signature field detected but marked read-only</div>
+      <div class="grade-item gi--pass"><span class="gi-icon">&#10003;</span> Output PDF opens without errors</div>
+      <div class="grade-item gi--fail"><span class="gi-icon">&#10007;</span> Checkboxes not toggled (expected checked, got unchecked)</div>
+    </div>
+  </div>
+
+</div>
+<script>var V='v1.0',B='https://github.com/Cadence-Intelligence/skills/releases/download/'+V+'/';document.querySelectorAll('.skill-dl-btn').forEach(function(e){e.href=B+e.dataset.skill+'.skill'})</script>
+</body></html>

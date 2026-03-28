@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Decision Engine Builder Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+    --font-display: 'Instrument Serif', Georgia, serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+    --bg: #faf9f7; --surface: #ffffff; --surface2: #f3f1ee; --surface-elevated: #fffdfb;
+    --border: rgba(0,0,0,0.07); --border-bright: rgba(0,0,0,0.14);
+    --text: #1a1614; --text-dim: #7a716a;
+    --blue: #1e3a5f; --blue-dim: rgba(30,58,95,0.07);
+    --gold: #b8860b; --gold-dim: rgba(184,134,11,0.07);
+    --green: #2d6a4f; --green-dim: rgba(45,106,79,0.07);
+    --rose: #9f1239; --rose-dim: rgba(159,18,57,0.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141210; --surface: #1e1b18; --surface2: #282420; --surface-elevated: #302b26;
+      --border: rgba(255,255,255,0.06); --border-bright: rgba(255,255,255,0.12);
+      --text: #ede8e3; --text-dim: #9a928a;
+      --blue: #7db4e0; --blue-dim: rgba(125,180,224,0.1);
+      --gold: #d4a73a; --gold-dim: rgba(212,167,58,0.1);
+      --green: #6ec79a; --green-dim: rgba(110,199,154,0.1);
+      --rose: #f9a8c9; --rose-dim: rgba(249,168,201,0.08);
+    }
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse at 15% 0%, var(--gold-dim) 0%, transparent 45%),
+      radial-gradient(ellipse at 85% 100%, var(--blue-dim) 0%, transparent 40%);
+    color: var(--text); font-family: var(--font-body); min-height: 100vh;
+  }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+  .anim { animation: fadeUp 0.5s ease-out both; animation-delay: calc(var(--i,0)*0.08s); }
+  @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:0.01ms!important; } }
+
+  .nav {
+    display:flex; align-items:center; justify-content:space-between; padding:16px 32px;
+    border-bottom:1px solid var(--border); background: color-mix(in srgb, var(--bg) 85%, transparent);
+    backdrop-filter: blur(12px); position:sticky; top:0; z-index:100;
+  }
+  .nav-brand { font-family:var(--font-display); font-size:20px; text-decoration:none; color:var(--text); }
+  .nav-links { display:flex; gap:6px; }
+  .nav-link { font-size:12px; font-weight:500; text-decoration:none; padding:6px 14px; border-radius:6px; color:var(--text-dim); transition:background 0.15s,color 0.15s; }
+  .nav-link:hover { background:var(--surface2); color:var(--text); }
+  .nav-link--active { background:var(--blue-dim); color:var(--blue); font-weight:600; }
+
+  .container { max-width:820px; margin:0 auto; padding:48px 24px; }
+
+  .back { font-family:var(--font-mono); font-size:11px; color:var(--text-dim); text-decoration:none; display:inline-flex; align-items:center; gap:4px; margin-bottom:24px; }
+  .back:hover { color:var(--text); }
+
+  .hero { margin-bottom:40px; }
+  .hero-cat {
+    font-family:var(--font-mono); font-size:10px; font-weight:600; text-transform:uppercase;
+    letter-spacing:1.5px; color:var(--gold); display:flex; align-items:center; gap:6px; margin-bottom:10px;
+  }
+  .hero-cat .hd { width:6px; height:6px; border-radius:50%; background:var(--gold); }
+  .hero h1 { font-family:var(--font-display); font-size:clamp(32px,4vw,42px); font-weight:400; margin-bottom:12px; line-height:1.15; }
+  .hero p { font-size:15px; line-height:1.7; color:var(--text-dim); max-width:580px; margin-bottom:16px; }
+  .hero-buttons { display:flex; gap:8px; flex-wrap:wrap; }
+  .btn {
+    font-family:var(--font-mono); font-size:11px; font-weight:500; text-decoration:none;
+    padding:8px 18px; border-radius:7px; transition:all 0.15s; display:inline-block;
+  }
+  .btn--primary { background:var(--text); color:var(--bg); border:1px solid var(--text); }
+  .btn--primary:hover { opacity:0.85; }
+  .btn--secondary { background:transparent; color:var(--text); border:1px solid var(--border-bright); }
+  .btn--secondary:hover { background:var(--surface2); }
+
+  .divider { height:1px; background:var(--border); margin:40px 0; }
+
+  .section { margin-bottom:48px; }
+  .section h2 { font-size:18px; font-weight:700; margin-bottom:16px; }
+  .section p { font-size:13px; line-height:1.7; color:var(--text-dim); margin-bottom:12px; }
+
+  /* Chat mockup */
+  .chat-mock {
+    background:#0c0a09; border-radius:12px; overflow:hidden;
+    box-shadow:0 8px 32px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.04);
+  }
+  .chat-chrome {
+    display:flex; align-items:center; justify-content:space-between; padding:10px 14px;
+    background:#1a1715; border-bottom:1px solid rgba(255,255,255,0.04);
+  }
+  .chat-dots { display:flex; gap:5px; }
+  .chat-dots span { width:8px; height:8px; border-radius:50%; }
+  .chat-dots span:nth-child(1){background:#ef4444} .chat-dots span:nth-child(2){background:#f59e0b} .chat-dots span:nth-child(3){background:#22c55e}
+  .chat-title { font-family:var(--font-mono); font-size:9px; color:#78716c; letter-spacing:0.8px; text-transform:uppercase; }
+  .chat-tag { font-family:var(--font-mono); font-size:8px; color:#d4a73a; display:flex; align-items:center; gap:4px; }
+  .chat-tag::before { content:''; width:4px; height:4px; border-radius:50%; background:#d4a73a; }
+  .chat-body { padding:20px 18px; display:flex; flex-direction:column; gap:14px; }
+
+  .msg { max-width:88%; border-radius:12px; padding:12px 16px; font-size:12px; line-height:1.7; }
+  .msg--user { background:rgba(125,180,224,0.1); color:#7db4e0; align-self:flex-end; border-bottom-right-radius:4px; }
+  .msg--ai { background:rgba(255,255,255,0.04); color:#a8a29e; align-self:flex-start; border-bottom-left-radius:4px; }
+  .msg--ai-highlight { background:rgba(212,167,58,0.08); color:#e7e5e4; align-self:flex-start; border-bottom-left-radius:4px; border-left:2px solid #d4a73a; }
+  .msg-label { font-family:var(--font-mono); font-size:9px; font-weight:600; color:#d4a73a; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:6px; display:block; }
+
+  /* Scoring table inside chat */
+  .score-table { width:100%; border-collapse:collapse; margin:10px 0 6px; font-size:11px; }
+  .score-table th {
+    text-align:left; padding:6px 8px; font-weight:600; color:#a8a29e; font-size:10px;
+    border-bottom:1px solid rgba(255,255,255,0.06); font-family:var(--font-mono);
+    text-transform:uppercase; letter-spacing:0.5px;
+  }
+  .score-table td { padding:6px 8px; border-bottom:1px solid rgba(255,255,255,0.03); color:#c4bdb5; }
+  .score-table .weight { font-family:var(--font-mono); color:#d4a73a; font-weight:600; font-size:12px; }
+  .score-table .quote { font-style:italic; color:#8a8279; font-size:10px; }
+
+  /* Output cards */
+  .output-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin:16px 0; }
+  .output-card {
+    background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05);
+    border-radius:8px; padding:12px; text-align:center;
+  }
+  .output-card .oc-num { font-family:var(--font-mono); font-size:20px; font-weight:700; color:#d4a73a; margin-bottom:2px; }
+  .output-card .oc-label { font-size:10px; color:#78716c; }
+
+  /* Task ranking */
+  .task-rank { display:flex; flex-direction:column; gap:4px; margin:10px 0; }
+  .task-item {
+    display:flex; align-items:center; gap:8px; padding:6px 10px;
+    background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.04);
+    border-radius:6px; font-size:11px; color:#c4bdb5;
+  }
+  .task-item .task-score { font-family:var(--font-mono); font-size:12px; font-weight:700; min-width:28px; }
+  .task-item:nth-child(1) .task-score { color:#22c55e; }
+  .task-item:nth-child(2) .task-score { color:#22c55e; }
+  .task-item:nth-child(3) .task-score { color:#d4a73a; }
+  .task-item:nth-child(4) .task-score { color:#d4a73a; }
+  .task-item:nth-child(5) .task-score { color:#78716c; }
+  .task-item .task-bar {
+    flex:1; height:4px; background:rgba(255,255,255,0.04); border-radius:2px; overflow:hidden;
+  }
+  .task-item .task-bar-fill { height:100%; border-radius:2px; }
+
+  .msg-sep { border:none; border-top:1px solid rgba(255,255,255,0.04); margin:4px 0; }
+
+  @media (max-width:700px) {
+    .nav { padding:12px 16px; }
+    .container { padding:32px 16px; }
+    .output-grid { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="nav-brand">Cadence Skills</a>
+  <div class="nav-links">
+    <a href="index.html" class="nav-link">Skills</a>
+    <a href="cadence-how-to-install.html" class="nav-link">Install</a>
+    <a href="how-skills-work.html" class="nav-link">Why Skills Work</a>
+  </div>
+</nav>
+
+<div class="container">
+
+  <a href="index.html" class="back anim" style="--i:0">&larr; All skills</a>
+
+  <div class="hero anim" style="--i:1">
+    <div class="hero-cat"><span class="hd"></span> Productivity</div>
+    <h1>Decision Engine Builder</h1>
+    <p>Pulls your decision-making out of your head and turns it into a scoring system you can automate. Works with any tool you already use.</p>
+    <div class="hero-buttons">
+      <a href="" class="btn btn--primary skill-dl-btn" data-skill="decision-engine-builder">Download .skill</a>
+      <a href="cadence-how-to-install.html" class="btn btn--secondary">Install guide</a>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="section anim" style="--i:2">
+    <h2>What a conversation looks like</h2>
+    <p>The skill starts by interviewing you. Five questions in Quick Mode, deeper if you want. Then it builds a scoring model from your actual answers and ranks your real tasks.</p>
+  </div>
+
+  <div class="chat-mock anim" style="--i:3">
+    <div class="chat-chrome">
+      <div class="chat-dots"><span></span><span></span><span></span></div>
+      <div class="chat-title">Claude Code</div>
+      <div class="chat-tag">Decision Engine Builder</div>
+    </div>
+    <div class="chat-body">
+
+      <div class="msg msg--user">"Help me figure out what to work on this week"</div>
+
+      <div class="msg msg--ai-highlight">
+        <span class="msg-label">Decision Engine Builder</span>
+        Let's build you a real system. I'll ask you 5 questions, then we'll have a working model. Ready?<br><br>
+        <strong style="color:#e7e5e4">When you look at your task list, what do you look at first?</strong>
+      </div>
+
+      <div class="msg msg--user">"Honestly? Who's asking. If a client sent it, I do it first."</div>
+
+      <div class="msg msg--ai">Got it. Client requests get top priority. <strong style="color:#c4bdb5">When two client things feel equally urgent, what tips the scale?</strong></div>
+
+      <div class="msg msg--user">"Revenue. Bigger account, faster response."</div>
+
+      <div class="msg msg--ai">Makes sense. <strong style="color:#c4bdb5">What do you keep skipping that you know you shouldn't?</strong></div>
+
+      <div class="msg msg--user">"Internal process docs. I know they matter but there's always a fire."</div>
+
+      <hr class="msg-sep">
+
+      <div class="msg msg--ai-highlight" style="max-width:95%">
+        <span class="msg-label">Scoring model (from your answers)</span>
+        <table class="score-table">
+          <thead><tr><th>Factor</th><th>Weight</th><th>Why (your words)</th></tr></thead>
+          <tbody>
+            <tr><td>Client request</td><td class="weight">+40</td><td class="quote">"If a client sent it, I do it first"</td></tr>
+            <tr><td>Revenue impact</td><td class="weight">+25</td><td class="quote">"Bigger account, faster response"</td></tr>
+            <tr><td>Deadline within 24h</td><td class="weight">+20</td><td class="quote">(inferred from urgency pattern)</td></tr>
+            <tr><td>Internal/process</td><td class="weight">-10</td><td class="quote">"Always a fire, these get skipped"</td></tr>
+            <tr><td>Protected slot</td><td class="weight">lock</td><td class="quote">1 slot/week reserved for docs</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="msg msg--ai" style="max-width:95%">
+        Here's how your current tasks rank with this model:
+
+        <div class="task-rank">
+          <div class="task-item"><span class="task-score">85</span> Acme Corp feature request <div class="task-bar"><div class="task-bar-fill" style="width:85%;background:#22c55e"></div></div></div>
+          <div class="task-item"><span class="task-score">72</span> Update pricing page (client ask) <div class="task-bar"><div class="task-bar-fill" style="width:72%;background:#22c55e"></div></div></div>
+          <div class="task-item"><span class="task-score">55</span> Respond to vendor RFP <div class="task-bar"><div class="task-bar-fill" style="width:55%;background:#d4a73a"></div></div></div>
+          <div class="task-item"><span class="task-score">41</span> Internal docs (protected slot) <div class="task-bar"><div class="task-bar-fill" style="width:41%;background:#d4a73a"></div></div></div>
+          <div class="task-item"><span class="task-score">18</span> Reorganize Notion workspace <div class="task-bar"><div class="task-bar-fill" style="width:18%;background:#78716c"></div></div></div>
+        </div>
+
+        <div class="output-grid">
+          <div class="output-card"><div class="oc-num">3</div><div class="oc-label">today's tasks</div></div>
+          <div class="output-card"><div class="oc-num">1</div><div class="oc-label">protected slot</div></div>
+          <div class="output-card"><div class="oc-num">1</div><div class="oc-label">rescheduled</div></div>
+        </div>
+
+        Does this ranking feel right? What would you swap?
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+  var SKILL_VERSION = 'v1.0';
+  var BASE_URL = 'https://github.com/Cadence-Intelligence/skills/releases/download/' + SKILL_VERSION + '/';
+  document.querySelectorAll('.skill-dl-btn').forEach(function(el) {
+    el.href = BASE_URL + el.dataset.skill + '.skill';
+  });
+</script>
+</body>
+</html>
