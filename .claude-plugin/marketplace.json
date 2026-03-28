@@ -1,0 +1,82 @@
+{
+  "name": "cadence",
+  "owner": {
+    "name": "Cadence"
+  },
+  "metadata": {
+    "description": "Cadence team skills for Claude Code.",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "decision-engine-builder",
+      "source": "./decision-engine-builder",
+      "strict": false,
+      "description": "Extract your decision-making through conversation, turn it into a scoring system.",
+      "version": "1.0",
+      "author": {
+        "name": "Cadence"
+      },
+      "homepage": "https://github.com/Cadence-Intelligence/skills",
+      "license": "CC BY-NC 4.0",
+      "category": "productivity",
+      "tags": ["decision-making", "prioritization", "triage", "automation"]
+    },
+    {
+      "name": "advanced-skill-creator",
+      "source": "./advanced-skill-creator",
+      "strict": false,
+      "description": "Create, test, and distribute Claude skills with a self-correcting Architect path.",
+      "version": "1.0",
+      "author": {
+        "name": "Cadence"
+      },
+      "homepage": "https://github.com/Cadence-Intelligence/skills",
+      "license": "CC BY-NC 4.0",
+      "category": "productivity",
+      "tags": ["skill-creation", "testing", "distribution", "architect"]
+    },
+    {
+      "name": "check-skill-security",
+      "source": "./check-skill-security",
+      "strict": false,
+      "description": "Security audit for third-party Claude skill files before installing them. Detects prompt injection, credential exfiltration, code obfuscation, supply chain attacks, and excessive permission requests.",
+      "version": "1.0",
+      "author": {
+        "name": "Cadence"
+      },
+      "homepage": "https://github.com/Cadence-Intelligence/skills",
+      "license": "CC BY-NC 4.0",
+      "category": "security",
+      "tags": ["security", "audit", "skill-safety", "prompt-injection"]
+    },
+    {
+      "name": "site-security-audit",
+      "source": "./site-security-audit",
+      "strict": false,
+      "description": "Security audit for live, deployed web apps. Detects your stack (Vercel, Supabase, Cloudflare Workers, Firebase) and runs targeted checks: secrets in JS bundles, API endpoints without auth, platform-specific misconfigurations.",
+      "version": "1.0",
+      "author": {
+        "name": "Cadence"
+      },
+      "homepage": "https://github.com/Cadence-Intelligence/skills",
+      "license": "CC BY-NC 4.0",
+      "category": "security",
+      "tags": ["security", "audit", "vibe-coding", "vercel", "supabase", "cloudflare", "firebase"]
+    },
+    {
+      "name": "cc-viz",
+      "source": "./cc-viz",
+      "strict": false,
+      "description": "Generate self-contained HTML pages for diagrams, architecture overviews, diff reviews, data tables, and slide decks. Proactively replaces complex ASCII tables with styled HTML.",
+      "version": "1.0",
+      "author": {
+        "name": "Cadence"
+      },
+      "homepage": "https://github.com/Cadence-Intelligence/skills",
+      "license": "CC BY-NC 4.0",
+      "category": "productivity",
+      "tags": ["visualization", "diagrams", "html", "architecture", "slides"]
+    }
+  ]
+}

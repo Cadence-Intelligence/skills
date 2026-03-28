@@ -1,0 +1,9 @@
+{
+  "name": "check-skill-security",
+  "version": "1.0",
+  "description": "Security audit for third-party Claude skill files before installing them.",
+  "author": {
+    "name": "Cadence"
+  },
+  "license": "CC BY-NC 4.0"
+}

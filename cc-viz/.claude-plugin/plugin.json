@@ -1,0 +1,9 @@
+{
+  "name": "cc-viz",
+  "version": "1.0",
+  "description": "Generate self-contained HTML pages for diagrams, architecture overviews, diff reviews, data tables, and slide decks.",
+  "author": {
+    "name": "Cadence"
+  },
+  "license": "CC BY-NC 4.0"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "advanced-skill-creator",
+  "version": "1.0",
+  "description": "Create, test, and distribute Claude skills with a self-correcting Architect path.",
+  "author": {
+    "name": "Cadence"
+  },
+  "license": "CC BY-NC 4.0"
+}

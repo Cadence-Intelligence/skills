@@ -1,0 +1,9 @@
+{
+  "name": "site-security-audit",
+  "version": "1.0",
+  "description": "Security audit for live, deployed web apps.",
+  "author": {
+    "name": "Cadence"
+  },
+  "license": "CC BY-NC 4.0"
+}

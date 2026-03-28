@@ -1,0 +1,9 @@
+{
+  "name": "decision-engine-builder",
+  "version": "1.0",
+  "description": "Extract your decision-making through conversation, turn it into a scoring system.",
+  "author": {
+    "name": "Cadence"
+  },
+  "license": "CC BY-NC 4.0"
+}
