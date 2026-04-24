@@ -88,6 +88,23 @@ For heavier eval paths (Full eval, Architect), outputs go into a workspace
 folder and the `eval-viewer` HTML UI becomes the visual review surface —
 see Step 3 "Reviewing and iterating" and [references/advanced-eval.md](references/advanced-eval.md).
 
+### Who grades the output? (taste-driven vs checkable)
+
+Before running any eval round, decide who the grader is. This is not optional —
+the wrong grader produces useless feedback.
+
+| Skill type | Grader | Why |
+|---|---|---|
+| **Taste-driven** — voice/tone, copywriting, design, aesthetic choices, "does this sound like me", "does this feel right" | **The human (the user), full stop.** No LLM-as-judge. | An LLM grading "is this Zain's voice" is guessing. Only the person whose taste defines the bar can judge. |
+| **Checkable** — formatting rules, schema conformance, presence of required sections, anti-pattern absence (e.g. "no em dashes") | A script, or an LLM with a tight rubric | Objectively verifiable from the output text itself. |
+| **Mixed** (most real skills) | Split the rubric: scripts/LLM grade the checkable dimensions, the human grades taste dimensions via eval-viewer. | Don't outsource taste to a model. Don't waste the human's time on things `grep` can answer. |
+
+**Routing rule:** if any rubric dimension is taste-driven, the eval round MUST
+end at the eval-viewer (browser review with `feedback.json`), not at an
+auto-graded score. The viewer is where the human sees outputs and leaves notes;
+those notes drive the next iteration. See Step 3 "Reviewing and iterating" and
+the Architect Phase 5 grading split.
+
 ---
 
 ## Skill format reference
@@ -487,6 +504,14 @@ dimensions:
     fail: "Great on some inputs, terrible on others."
 ```
 
+**Tag every dimension `checkable` or `taste`.** A dimension is `checkable` if a
+script or a model with no domain knowledge can verify it from the output alone
+("contains no em dashes", "all required sections present", "valid JSON"). A
+dimension is `taste` if judging it requires knowing the user's preferences,
+aesthetic, or domain ("sounds like Zain", "feels intentional", "the palette
+works"). Phase 5 routes graders based on these tags — see "Who grades the
+output?" above.
+
 Save the rubric to `references/quality-rubric.md` in the skill folder.
 
 ### Phase 3 — Draft SKILL.md (V1)
@@ -527,7 +552,22 @@ delegate Rounds 2-3.
 
 ### Phase 5 — Grade
 
-For each output, grade against every rubric dimension using `<thinking>` to reason before scoring:
+**Route by dimension tag** (set in Phase 2):
+
+- **`checkable` dimensions** — grade in-session. Use a script when one fits
+  (e.g. `grep -c "—"` for em-dash count); otherwise reason through with
+  `<thinking>` and produce a PASS/FAIL.
+- **`taste` dimensions** — **do not auto-grade**. Launch the eval-viewer
+  (see [references/advanced-eval.md](references/advanced-eval.md) §"Grade,
+  aggregate, launch viewer") so the user reviews each output in the browser
+  and writes notes into `feedback.json`. Their notes ARE the grade for taste
+  dimensions. Wait for them to finish before continuing the loop.
+
+If every dimension is `taste`, skip the auto-grade step entirely — go straight
+to eval-viewer and let the user drive. If every dimension is `checkable`,
+auto-grade and skip the viewer.
+
+For checkable dimensions, grade with `<thinking>` to reason before scoring:
 
 ```xml
 <thinking>
