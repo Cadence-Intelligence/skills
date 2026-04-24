@@ -1,14 +1,18 @@
 ---
 name: advanced-skill-creator
 description: >
-  Create, test, and distribute Claude skills with a self-correcting Architect path.
-  Use when the user wants to build a skill from scratch, turn a workflow into a
-  reusable skill, edit or improve an existing SKILL.md, package a skill for
-  distribution, test whether a skill works well, or optimize a skill's description
-  so it triggers more reliably. Also use when the user asks how to make the agent
-  remember a workflow, do something consistently in future sessions, or share a
-  skill with others. For comprehensive, reference-heavy skills that produce creative
-  or generative output (HTML, documents, designs, copy), use the Architect path.
+  Create, test, package, and distribute Claude Code skills. Use whenever the user
+  wants to build a skill from scratch, turn a recurring prompt or workflow into a
+  reusable skill, stop copy-pasting the same instructions, make a workflow run
+  consistently across future sessions, edit or improve an existing SKILL.md,
+  package a skill folder for sharing, zip a skill as a .skill archive, ship a
+  skill to teammates, test whether a skill triggers or works end-to-end, or
+  tune a skill description so it fires on the right queries. Fires for phrases
+  like "turn this into a skill", "make this a skill", "package this skill",
+  "distribute this skill", "make claude remember this workflow", "reuse this
+  prompt", "share this skill". For reference-heavy skills that produce creative
+  or generative output (HTML, documents, designs, copy) where quality varies
+  across runs, use the Architect path.
 license: CC BY-NC 4.0
 metadata:
   author: cadence
@@ -18,9 +22,12 @@ metadata:
 # Skill Creator
 
 Create, test, and distribute skills — from a 5-minute draft to a fully
-evaluated, packaged skill.
+evaluated, packaged skill. Follows the Agent Skills standard.
 
-Works with both **pi** (Agent Skills standard) and **Claude Code** skill formats.
+The simplest use is just Steps 1–2: capture intent, write a SKILL.md, save
+it to `~/.claude/skills/<name>/`, and you're done. Everything after Step 2
+(testing, packaging, description optimization, Architect) is optional and
+only pulled in when the user asks.
 
 ## Pick your path
 
@@ -32,13 +39,54 @@ Works with both **pi** (Agent Skills standard) and **Claude Code** skill formats
 | **Package existing** | User has a skill folder and just wants to distribute it |
 | **Architect** | Deep skill with references, templates, anti-patterns, and self-correction loop. Use for skills that produce creative/generative output (HTML, documents, designs, copy) where quality varies across runs. |
 
-When unsure, ask: *"Do you want a quick draft, or test and iterate?"*
+### Confirm the path with the user (mandatory when ambiguous)
 
-**Auto-suggest Architect when:**
+If the request clearly maps to one path (e.g. *"package this skill"* → Package,
+*"optimize the trigger description"* → Full eval), proceed — don't ask a pointless
+question. Otherwise **use the `AskUserQuestion` tool** with these options so the
+user picks explicitly:
+
+```
+question: "Which path should I take?"
+multiSelect: false
+options:
+  - label: "Draft only"     description: "Write the SKILL.md and install it. ~5 minutes."
+  - label: "Draft + test"   description: "Draft, then run it on a few prompts side-by-side."
+  - label: "Full eval"      description: "Structured eval + description optimization loop."
+  - label: "Package existing" description: "Validate and zip an existing skill folder."
+  - label: "Architect"      description: "Deep skill with rubric, anti-patterns, iterative loop. Slower."
+```
+
+Do not silently default. If `AskUserQuestion` is unavailable, ask in plain text
+and wait for the user to answer before drafting.
+
+**Auto-suggest Architect when** the request matches any of:
 - The skill produces HTML, documents, copy, designs, or other creative output
 - The user mentions "comprehensive", "high-quality", "like cc-viz", "detailed"
 - The user wants anti-patterns, quality guardrails, or aesthetic guidelines
 - Output quality would vary significantly across runs without guardrails
+
+Surface Architect as the default option in the `AskUserQuestion` call when
+these conditions match, but still let the user override.
+
+### Checkpoints (always show the user before committing)
+
+At each of these points, present what you have and wait for confirmation before
+moving on. Don't write files to `~/.claude/skills/` (or anywhere else durable)
+until the user has seen and approved them:
+
+1. **After intent capture** — recap "here's what I understood" in 2–4 bullets
+   before drafting.
+2. **Before saving the SKILL.md** — show the full draft (frontmatter + body)
+   in a fenced block and ask "save this as-is, or iterate?"
+3. **After test runs** — show with-skill vs baseline outputs side-by-side and
+   ask for feedback before revising.
+4. **Before packaging or installing globally** — show the final folder layout
+   and install path and ask for approval.
+
+For heavier eval paths (Full eval, Architect), outputs go into a workspace
+folder and the `eval-viewer` HTML UI becomes the visual review surface —
+see Step 3 "Reviewing and iterating" and [references/advanced-eval.md](references/advanced-eval.md).
 
 ---
 
@@ -59,7 +107,7 @@ skill-name/              ← directory name must match frontmatter `name`
 name: kebab-case-name       # max 64 chars; [a-z0-9-] only; no leading/trailing hyphens
 description: >              # max 1024 chars; this is the triggering mechanism
   What it does and when to use it.
-license: MIT                # optional
+license: CC BY-NC 4.0       # optional; any SPDX identifier or custom string
 compatibility: Requires...  # optional; max 500 chars
 metadata:                   # optional; arbitrary key-value pairs
   author: example-org
@@ -71,11 +119,11 @@ The `name` must match the parent directory name.
 
 ### Installation locations
 
-| Scope | pi | Claude Code |
-|-------|-----|-------------|
-| Global | `~/.pi/agent/skills/` | `~/.claude/skills/` |
-| Project | `.pi/skills/` | `.claude/skills/` (project-level) |
-| Shared | `~/.agents/skills/` | `~/.agents/skills/` |
+| Scope | Path |
+|-------|------|
+| User-level | `~/.claude/skills/` |
+| Project-level | `.claude/skills/` |
+| Plugin-bundled | `<plugin>/skills/` |
 
 ---
 
@@ -163,31 +211,61 @@ Design for agentic use:
 - Structured output (JSON/CSV) to stdout; diagnostics to stderr
 - Idempotent where possible — agents may retry
 
+### Install and done (Draft-only path)
+
+For a personal or project-local skill, save the folder and stop:
+
+```bash
+# User-level (available in every session)
+mkdir -p ~/.claude/skills/my-skill
+cp SKILL.md ~/.claude/skills/my-skill/
+
+# Or project-level (only available in this repo)
+mkdir -p .claude/skills/my-skill
+cp SKILL.md .claude/skills/my-skill/
+```
+
+Restart Claude Code (or open a new session) and test by sending a prompt that
+should trigger it. **If that's all you need, stop here.** Steps 3–5 and the
+Architect path below are only for when the user explicitly wants testing,
+distribution, or description tuning.
+
 ---
 
-## Step 3 — Test the skill (optional but recommended)
+## Step 3 — Test the skill (optional)
 
 After drafting, propose 2–3 test prompts. Share them: *"Here are a few test cases
 — do these look right?"* Then run them.
 
-### Running tests in pi
+### Running tests
 
-For each test prompt, run two parallel pi instances via bash:
+For a quick check, the simplest thing is to install the skill (see Step 2
+"Install and done") and just prompt Claude — if it triggers and the output
+looks right, you're done.
 
-**With-skill run:**
+For a more structured comparison, produce two outputs per prompt — one with
+the skill, one without — so you can see the delta. Two ways:
+
+**Option A — delegate via the `Agent` tool** (recommended inside Claude Code):
+spawn two subagents in parallel. Give each the same prompt, and tell the
+with-skill one to read the `SKILL.md` first. Collect outputs and any files
+they wrote to a scratch directory.
+
+**Option B — shell out to `claude -p`:**
 ```bash
-pi -p --skill <path-to-skill-folder> "<test prompt>" \
-  > <workspace>/with_skill/output.md 2>&1 &
-```
+# With-skill: let the skill load naturally so triggering (not just
+# instruction-following) is what's being tested.
+claude -p "<test prompt>" > /tmp/with_skill.md 2>&1 &
 
-**Baseline run** (same prompt, no skill):
-```bash
-pi -p --no-skills "<test prompt>" \
-  > <workspace>/without_skill/output.md 2>&1 &
+# Baseline: same prompt, skill uninstalled or renamed
+claude -p "<test prompt>" > /tmp/baseline.md 2>&1 &
 wait
 ```
 
-If parallel runs aren't practical, run sequentially — with-skill first, then baseline.
+If parallel runs aren't practical, run sequentially — with-skill first,
+then baseline. If you want to grade multiple prompts quantitatively,
+jump to the Full Eval subsections below or `references/advanced-eval.md`
+for the structured `<workspace>/iteration-N/eval-<slug>/...` layout.
 
 ### Reviewing and iterating
 
@@ -224,28 +302,42 @@ For full quantitative benchmarking details:
 
 ---
 
-## Step 4 — Package for distribution
+## Step 4 — Package for distribution (optional)
 
-### As a pi package (npm)
+Only needed when sharing the skill with others. For personal use, Step 2's
+"Install and done" is all you need.
 
-If the skill should be installable via `pi install`:
+### As a folder (simplest — for sharing via Git, Drive, copy-paste)
 
-```json
-{
-  "name": "my-skill-package",
-  "keywords": ["pi-package"],
-  "pi": {
-    "skills": ["./skills"]
-  }
-}
+Ship the skill directory as-is. The recipient copies it into
+`~/.claude/skills/<name>/` (or `.claude/skills/<name>/` for project scope)
+and it activates on the next session.
+
+### As a Claude Code plugin (for marketplace distribution)
+
+Wrap one or more skills in a plugin so they can be installed via
+`/plugin install`. Minimal layout:
+
 ```
+my-plugin/
+├── .claude-plugin/
+│   └── plugin.json          # { "name": "my-plugin", "version": "1.0", ... }
+└── skills/
+    └── my-skill/
+        └── SKILL.md
+```
+
+Users install with `/plugin install my-plugin@<marketplace>` once the plugin
+is published to a marketplace.
 
 ### As a .skill file (zip archive)
 
 Use the bundled packager. It validates first, then zips, excluding `evals/`,
-`__pycache__`, `.DS_Store`, and `node_modules`:
+`__pycache__`, `.DS_Store`, and `node_modules`. Run it from the skill-creator
+directory (so `scripts/` resolves correctly):
 
 ```bash
+cd <path-to>/advanced-skill-creator
 python3 scripts/package_skill.py path/to/my-skill
 python3 scripts/package_skill.py path/to/my-skill ./dist   # custom output dir
 ```
@@ -255,9 +347,6 @@ See [scripts/package_skill.py](scripts/package_skill.py) for the full implementa
 ### Installing a .skill file
 
 ```bash
-# Extract and place in skills directory
-unzip my-skill.skill -d ~/.pi/agent/skills/
-# Or for Claude Code:
 unzip my-skill.skill -d ~/.claude/skills/
 ```
 
@@ -266,8 +355,11 @@ unzip my-skill.skill -d ~/.claude/skills/
 Run the validator directly to check a skill without packaging:
 
 ```bash
+cd <path-to>/advanced-skill-creator
 python3 scripts/validate_skill.py path/to/my-skill
 ```
+
+Install the Python dependencies once: `pip install -r scripts/requirements.txt`.
 
 See [scripts/validate_skill.py](scripts/validate_skill.py) for the full implementation.
 
@@ -287,9 +379,10 @@ If the skill isn't triggering when it should:
 
 1. Write 10–15 test phrases (mix of should/shouldn't trigger)
 2. Include near-misses — phrases that share keywords but need something different
-3. Run them via `pi -p` and note whether the skill was loaded
+3. Run them through `scripts/run_eval.py` (shells out to `claude -p` in parallel)
+   and note whether the skill was loaded
 4. Revise the description to address the pattern, not specific query wording
-5. Repeat until stable
+5. Repeat until stable, or let `scripts/run_loop.py` do the iteration for you
 
 ### Trigger eval format
 
@@ -301,6 +394,28 @@ If the skill isn't triggering when it should:
 ```
 
 Good should-not-trigger queries are near-misses, not obviously irrelevant ones.
+
+### Automated loop
+
+Run the eval-and-improve loop end-to-end. It holds out a test set, proposes
+description rewrites by shelling out to `claude -p`, and picks the
+highest-scoring variant on the held-out set:
+
+```bash
+cd <path-to>/advanced-skill-creator
+python3 -m scripts.run_loop \
+  --eval-set path/to/trigger-eval.json \
+  --skill-path path/to/my-skill \
+  --max-iterations 5 \
+  --verbose
+```
+
+Uses your existing Claude Code auth — the Claude Code CLI must be on `$PATH`.
+Install Python deps once with `pip install -r scripts/requirements.txt`.
+
+As an alternative to running the script directly, you can delegate the
+same loop to a subagent via the `Agent` tool — pass it the skill path, eval
+set, and this workflow, and collect the resulting `best_description`.
 
 For the full optimization workflow: → [references/advanced-eval.md](references/advanced-eval.md)
 
@@ -394,9 +509,21 @@ Run the draft skill on 3-4 **deliberately varied** inputs:
 | Edge case / unusual | Does it handle ambiguity gracefully? |
 | Minimal input | What does it do with almost no guidance? |
 
-Save all outputs to a workspace folder: `evals/round-N/output-1.ext`, etc.
+Save all outputs to a workspace folder using the same layout as the full-eval
+path so `aggregate_benchmark.py` and `eval-viewer/generate_review.py` can
+consume them later:
 
-**Speed option:** Delegate generation to other agents via `interactive_shell` dispatch or `coding_task` for parallel runs. Keep Round 1 in-session (need the context), Rounds 2-3 can be delegated.
+```
+<skill-name>-workspace/
+└── iteration-N/
+    └── eval-<slug>/
+        └── with_skill/
+            └── run-1/outputs/output.ext
+```
+
+**Speed option:** delegate generation to subagents via the `Agent` tool so
+rounds can run in parallel. Keep Round 1 in-session (you need the context),
+delegate Rounds 2-3.
 
 ### Phase 5 — Grade
 
@@ -424,7 +551,7 @@ Output 1 (typical case): 82/100
   ✅ Cross-Run Consistency (7/15) — first run, limited data
 ```
 
-Save to `evals/round-N-grades.md`.
+Save to `<skill-name>-workspace/iteration-N/grades.md`.
 
 ### Phase 6 — Extract Patterns
 
@@ -506,9 +633,13 @@ skill-name/
 │   ├── template-1.ext          ← Best from Round 1 (with style comment)
 │   └── template-2.ext          ← Best from Round 2 (deliberately different)
 └── evals/                      ← Optional: grading history for re-evaluation
-    ├── round-1-grades.md
-    └── round-2-grades.md
+    ├── iteration-1-grades.md
+    └── iteration-2-grades.md
 ```
+
+Put iteration workspaces outside the skill directory — `package_skill.py` only
+excludes a top-level `evals/` folder, so keep ad-hoc run artifacts elsewhere
+to avoid bloating the `.skill` archive.
 
 Run Step 4 (Package) and Step 5 (Description Optimization) from the standard paths.
 

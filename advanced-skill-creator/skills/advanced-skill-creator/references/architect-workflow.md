@@ -163,7 +163,7 @@ For speed, generation rounds can be delegated:
 | Round | Approach | Why |
 |-------|----------|-----|
 | Round 1 | In-session | Need full conversation context for first draft |
-| Round 2+ | Delegate via `interactive_shell` dispatch or `coding_task` | Faster, parallel, and tests whether the skill works without conversation context |
+| Round 2+ | Delegate via the `Agent` tool (general-purpose subagent), or shell out to `claude -p` with the skill installed | Faster, parallel, and tests whether the skill works without conversation context |
 
 Delegated agents should receive:
 - The skill folder (SKILL.md + references + templates)
