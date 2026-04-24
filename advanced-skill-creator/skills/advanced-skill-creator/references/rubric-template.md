@@ -9,14 +9,39 @@ rubric:
   name: "[Skill Name] Quality Rubric"
   total_points: 100
   pass_threshold: 75
-  
+
   dimensions:
     - name: "[Dimension Name]"
       weight: [points]
+      grading: script | hybrid | judgment   # preferred; Phase 5 infers from criteria if absent
       pass: "[Observable, binary criteria for PASS]"
       fail: "[Observable, binary criteria for FAIL]"
       evidence_required: "[What the grader must cite]"
+      script_signals: |                      # for script / hybrid: list the concrete checks
+        [Concrete checks the script will run — regex, word count, schema validation]
 ```
+
+## Grading tags
+
+Every dimension belongs to one of three grading categories. Phase 5 routes
+by category. The category can be expressed two ways:
+
+1. **Preferred:** explicit `grading:` field on the dimension YAML.
+2. **Acceptable:** the criteria text makes the category obvious (phrases
+   like "grep for X" / "word count between N and M" → `script`; "reads like
+   the user's voice" / "feels intentional" → `judgment`).
+
+The three categories:
+
+| Tag | Meaning | Examples |
+|---|---|---|
+| `script` | Fully mechanical: a regex, word count, list lookup, or schema check decides PASS/FAIL alone. No human or LLM judgment needed. | "No em dashes appear", "Output is valid JSON", "Word count between 600-1000" |
+| `hybrid` | A script catches the obvious failures (cheap gate); judgment grades the rest. | "Length in band AND opener is a claim, not setup" — length is script, opener-quality is judgment |
+| `judgment` | No mechanical shortcut. Must be read by a grader. If the criteria require user-specific taste (voice, brand, design), the **human** is the only valid grader (route to eval-viewer). Domain-neutral judgment can be LLM-graded. | "Sounds like the user's voice" (human only), "Heading hierarchy is logical" (LLM ok) |
+
+**Routing implication:** if any `judgment` dimension is user-taste, the eval
+round MUST end at the eval-viewer so the user grades it via `feedback.json`.
+See SKILL.md "Who grades the output?" for the full routing rule.
 
 ## Universal Dimensions
 
@@ -26,18 +51,22 @@ Include these in every rubric (adjust weights):
 ```yaml
 - name: "Information Completeness"
   weight: 20-30
+  grading: hybrid
   pass: "All requested information is present. No sections missing, truncated, or containing placeholder text like TODO or TBD."
   fail: "One or more requested sections are missing, content is truncated mid-sentence, or placeholder text remains."
   evidence_required: "List every section/item from the input that should appear in the output. Check each one."
+  script_signals: "Grep for TODO/TBD/placeholder. Check for sections listed in the input prompt."
 ```
 
 ### Anti-Pattern Free
 ```yaml
 - name: "Anti-Pattern Free"
   weight: 15-25
+  grading: script
   pass: "None of the anti-patterns listed in references/anti-patterns.md are present."
   fail: "One or more documented anti-patterns are present in the output."
   evidence_required: "Check each anti-pattern in the list. Cite any found with line/location."
+  script_signals: "Each anti-pattern should be expressible as a regex or word-boundary match. Run them all and report hits."
 ```
 
 ## Domain-Specific Dimensions

@@ -7,22 +7,30 @@ graded assertions, and a browser-based reviewer.
 
 ## Workspace layout
 
+`aggregate_benchmark.py` and `eval-viewer/generate_review.py` expect this
+layout. Create directories as you go — don't pre-create the whole tree.
+
 ```
 <skill-name>-workspace/
 ├── iteration-1/
-│   ├── eval-<name>/
+│   ├── eval-<slug>/
 │   │   ├── eval_metadata.json
-│   │   ├── with_skill/outputs/
-│   │   ├── without_skill/outputs/
-│   │   ├── grading.json
-│   │   └── timing.json
+│   │   ├── with_skill/
+│   │   │   ├── run-1/
+│   │   │   │   ├── outputs/              ← files the agent produced
+│   │   │   │   ├── grading.json
+│   │   │   │   └── timing.json
+│   │   │   └── run-2/…
+│   │   └── without_skill/
+│   │       └── run-1/…
 │   ├── benchmark.json
 │   └── benchmark.md
 └── iteration-2/
     └── ...
 ```
 
-Create directories as you go — don't pre-create the whole tree.
+Per-run `grading.json` + `timing.json` files live alongside `outputs/` inside
+each `run-N/` directory so every run is self-contained.
 
 ---
 
@@ -67,7 +75,7 @@ Execute this task:
 - Skill path: <path-to-skill>
 - Task: <eval prompt>
 - Input files: <eval files, or "none">
-- Save outputs to: <workspace>/iteration-N/<eval-name>/with_skill/outputs/
+- Save outputs to: <workspace>/iteration-N/<eval-slug>/with_skill/run-N/outputs/
 - What to save: <files the user cares about>
 ```
 
@@ -75,7 +83,7 @@ Execute this task:
 ```
 Execute this task WITHOUT using any skill:
 - Task: <eval prompt>
-- Save outputs to: <workspace>/iteration-N/<eval-name>/without_skill/outputs/
+- Save outputs to: <workspace>/iteration-N/<eval-slug>/without_skill/run-N/outputs/
 ```
 
 Write `eval_metadata.json` per eval:
@@ -112,20 +120,21 @@ immediately — this is the only opportunity:
 ### 4. Grade, aggregate, launch viewer
 
 **Grade each run** — spawn a grader subagent with `agents/grader.md`. Save
-results to `grading.json` in each run directory. For programmatically verifiable
-assertions, write and run a script rather than eyeballing.
+results to `grading.json` inside each `run-N/` directory. For programmatically
+verifiable assertions, write and run a script rather than eyeballing.
 
-**Aggregate** (from the skill-creator directory, if available):
+**Aggregate** — from the skill-creator directory:
 ```bash
-python -m scripts.aggregate_benchmark <workspace>/iteration-N --skill-name <name>
+cd <path-to>/advanced-skill-creator
+python3 -m scripts.aggregate_benchmark <workspace>/iteration-N --skill-name <name>
 ```
 
-This produces `benchmark.json` and `benchmark.md`. See `schemas.md` for the
-exact schema the viewer expects.
+This produces `benchmark.json` and `benchmark.md` in the iteration directory.
+See `schemas.md` for the exact schema the viewer expects.
 
 **Launch viewer:**
 ```bash
-nohup python <skill-creator-path>/eval-viewer/generate_review.py \
+nohup python3 <path-to>/advanced-skill-creator/eval-viewer/generate_review.py \
   <workspace>/iteration-N \
   --skill-name "my-skill" \
   --benchmark <workspace>/iteration-N/benchmark.json \
@@ -136,7 +145,7 @@ VIEWER_PID=$!
 For iteration 2+, add `--previous-workspace <workspace>/iteration-N-1`.
 
 In headless environments: add `--static <output_path>` to produce a standalone
-HTML file instead of a server.
+HTML file instead of a server. Viewer has zero dependencies beyond stdlib.
 
 Tell the user: *"I've opened the results in your browser. The 'Outputs' tab lets
 you click through each test case and leave feedback; 'Benchmark' shows the
@@ -204,16 +213,19 @@ After the skill content is finalized, optimize triggering accuracy.
 
 **Run the optimization loop:**
 ```bash
-python -m scripts.run_loop \
+cd <path-to>/advanced-skill-creator
+python3 -m scripts.run_loop \
   --eval-set <path/to/trigger-eval.json> \
   --skill-path <path/to/skill> \
-  --model claude-sonnet-4-6 \
   --max-iterations 5 \
   --verbose
 ```
 
-This handles splitting, parallel evaluation (3 runs per query), LLM-proposed
-improvements, and produces `best_description` selected by validation score.
+This handles splitting, parallel evaluation (3 runs per query), subprocess
+`claude -p` calls for both evaluation and improvement, and produces
+`best_description` selected by validation score. Add `--model <model-id>` to
+pin a specific model; otherwise the user's configured Claude Code default
+is used. Uses Claude Code subscription auth — no `ANTHROPIC_API_KEY` needed.
 
 **Apply the result:** update `description` in SKILL.md frontmatter. Verify it's
 under 1024 chars. Test a few fresh prompts manually.

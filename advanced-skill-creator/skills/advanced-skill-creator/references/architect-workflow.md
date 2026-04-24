@@ -88,6 +88,38 @@ Good criteria are:
 Bad criteria: "The output feels professional" (not observable, not binary)
 Good criteria: "The output uses a named font pairing from the approved list, not Inter/Roboto/system-ui" (observable, binary, specific)
 
+### Categorize every dimension as `script | hybrid | judgment`
+
+Every dimension belongs to one of three grading categories — Phase 5 routes
+by category. See [rubric-template.md](rubric-template.md) §"Grading tags"
+for the full taxonomy.
+
+- **`script`** — fully mechanical (regex, word count, schema check). Phase 5
+  runs the script in-session, no human or LLM judgment.
+- **`hybrid`** — script catches obvious failures, judgment grades the rest.
+  Phase 5 runs the script first, then reasons through the judgment portion.
+- **`judgment`** — must be read by a grader.
+  - If the criteria are domain-neutral (e.g. "heading hierarchy is logical"),
+    LLM-as-judge is acceptable in-session.
+  - If the criteria require **user-specific taste** (voice, brand, design,
+    "does this sound like me"), the **human is the only valid grader**.
+    Phase 5 routes these to the eval-viewer where the user writes notes into
+    `feedback.json`. Never auto-grade user-taste dimensions.
+
+**Express the category** one of two ways:
+
+1. **Preferred:** explicit `grading: script | hybrid | judgment` field on the
+   dimension YAML, plus an optional `script_signals:` field listing the
+   concrete checks for `script` and `hybrid` dimensions.
+2. **Acceptable:** make the category obvious in the criteria text — phrases
+   like "grep for X", "regex match", "word count between N and M" signal
+   `script`; "reads like the user's voice", "feels intentional" signal
+   `judgment`.
+
+Phase 5 infers from criteria text when no explicit tag is present. Don't
+block on schema; block on whether the routing is unambiguous. If a
+dimension's category would be ambiguous to Phase 5, add the explicit tag.
+
 ## Pattern Extraction Guidelines
 
 ### Extracting Anti-Patterns
@@ -163,7 +195,7 @@ For speed, generation rounds can be delegated:
 | Round | Approach | Why |
 |-------|----------|-----|
 | Round 1 | In-session | Need full conversation context for first draft |
-| Round 2+ | Delegate via `interactive_shell` dispatch or `coding_task` | Faster, parallel, and tests whether the skill works without conversation context |
+| Round 2+ | Delegate via the `Agent` tool (general-purpose subagent), or shell out to `claude -p` with the skill installed | Faster, parallel, and tests whether the skill works without conversation context |
 
 Delegated agents should receive:
 - The skill folder (SKILL.md + references + templates)

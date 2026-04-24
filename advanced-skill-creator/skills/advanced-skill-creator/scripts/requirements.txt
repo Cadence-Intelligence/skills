@@ -1,0 +1,11 @@
+# Dependencies for advanced-skill-creator scripts.
+#
+# Install from the skill directory:
+#   pip install -r scripts/requirements.txt
+
+# Required by scripts/validate_skill.py and scripts/package_skill.py
+pyyaml>=6.0
+
+# Note: scripts/run_eval.py, run_loop.py, and improve_description.py all shell
+# out to `claude -p`, so they use your Claude Code subscription auth — no
+# separate ANTHROPIC_API_KEY required. The Claude Code CLI must be on $PATH.
