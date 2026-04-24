@@ -88,6 +88,27 @@ Good criteria are:
 Bad criteria: "The output feels professional" (not observable, not binary)
 Good criteria: "The output uses a named font pairing from the approved list, not Inter/Roboto/system-ui" (observable, binary, specific)
 
+### Tag every dimension with `grading: script | hybrid | judgment`
+
+Every dimension MUST carry a `grading:` tag in the YAML — this is what Phase 5
+uses to route graders. See [rubric-template.md](rubric-template.md) §"Grading
+tags" for the full taxonomy.
+
+- **`script`** — fully mechanical (regex, word count, schema check). Phase 5
+  runs the script in-session, no human or LLM judgment.
+- **`hybrid`** — script catches obvious failures, judgment grades the rest.
+  Phase 5 runs the script first, then reasons through the judgment portion.
+- **`judgment`** — must be read by a grader.
+  - If the criteria are domain-neutral (e.g. "heading hierarchy is logical"),
+    LLM-as-judge is acceptable in-session.
+  - If the criteria require **user-specific taste** (voice, brand, design,
+    "does this sound like me"), the **human is the only valid grader**.
+    Phase 5 routes these to the eval-viewer where the user writes notes into
+    `feedback.json`. Never auto-grade user-taste dimensions.
+
+For `script` and `hybrid` dimensions, also add a `script_signals:` field
+listing the concrete checks the script will run.
+
 ## Pattern Extraction Guidelines
 
 ### Extracting Anti-Patterns

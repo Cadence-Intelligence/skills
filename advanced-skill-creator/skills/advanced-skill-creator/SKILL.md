@@ -88,22 +88,26 @@ For heavier eval paths (Full eval, Architect), outputs go into a workspace
 folder and the `eval-viewer` HTML UI becomes the visual review surface —
 see Step 3 "Reviewing and iterating" and [references/advanced-eval.md](references/advanced-eval.md).
 
-### Who grades the output? (taste-driven vs checkable)
+### Who grades the output? (script / hybrid / judgment)
 
-Before running any eval round, decide who the grader is. This is not optional —
-the wrong grader produces useless feedback.
+Before running any eval round, decide per-dimension how it gets graded. The
+rubric needs a `grading:` tag on every dimension. Three values:
 
-| Skill type | Grader | Why |
-|---|---|---|
-| **Taste-driven** — voice/tone, copywriting, design, aesthetic choices, "does this sound like me", "does this feel right" | **The human (the user), full stop.** No LLM-as-judge. | An LLM grading "is this Zain's voice" is guessing. Only the person whose taste defines the bar can judge. |
-| **Checkable** — formatting rules, schema conformance, presence of required sections, anti-pattern absence (e.g. "no em dashes") | A script, or an LLM with a tight rubric | Objectively verifiable from the output text itself. |
-| **Mixed** (most real skills) | Split the rubric: scripts/LLM grade the checkable dimensions, the human grades taste dimensions via eval-viewer. | Don't outsource taste to a model. Don't waste the human's time on things `grep` can answer. |
+| Tag | Meaning | Grader | Example |
+|---|---|---|---|
+| **`script`** | Fully mechanical — regex, word count, list lookup, schema validation | Auto-graded by a small script in-session, no human needed | "No em dashes appear", "Output is valid JSON", "≤ 1000 words" |
+| **`hybrid`** | Script catches the obvious failures, judgment grades the rest | Script first (gates out the cheap fails), then judgment for what's left | "Length in band AND opener is a claim not setup" — length is script, opener-quality is judgment |
+| **`judgment`** | No mechanical shortcut; must be read by a grader | LLM-as-judge IF the criteria are domain-neutral (formatting consistency, presence of structure); otherwise **the human** via eval-viewer | "Sounds like the user's voice", "Feels intentional", "Palette works for the brand" |
 
-**Routing rule:** if any rubric dimension is taste-driven, the eval round MUST
-end at the eval-viewer (browser review with `feedback.json`), not at an
-auto-graded score. The viewer is where the human sees outputs and leaves notes;
-those notes drive the next iteration. See Step 3 "Reviewing and iterating" and
-the Architect Phase 5 grading split.
+**Routing rule:** if any `judgment` dimension requires user-specific taste
+(voice, design, brand, "does this sound like me") the eval round MUST end at
+the eval-viewer so the user reviews outputs and writes notes into
+`feedback.json` — those notes ARE the grade. LLM-as-judge is only acceptable
+for domain-neutral judgment dimensions (e.g. "is the heading hierarchy
+logical"), never for user-taste dimensions.
+
+The Architect Phase 2 (rubric design) and Phase 5 (grade) sections enforce
+this — every dimension must carry the `grading:` tag and Phase 5 routes by it.
 
 ---
 
@@ -504,13 +508,15 @@ dimensions:
     fail: "Great on some inputs, terrible on others."
 ```
 
-**Tag every dimension `checkable` or `taste`.** A dimension is `checkable` if a
-script or a model with no domain knowledge can verify it from the output alone
-("contains no em dashes", "all required sections present", "valid JSON"). A
-dimension is `taste` if judging it requires knowing the user's preferences,
-aesthetic, or domain ("sounds like Zain", "feels intentional", "the palette
-works"). Phase 5 routes graders based on these tags — see "Who grades the
-output?" above.
+**Tag every dimension `grading: script | hybrid | judgment`.** This is required —
+Phase 5 routes graders based on the tag. See "Who grades the output?" above for
+the full taxonomy and the example rubric in
+[references/rubric-template.md](references/rubric-template.md). Quick guide:
+
+- `script` — a regex, word count, or schema check decides PASS/FAIL alone.
+- `hybrid` — a script gates the obvious fails; judgment grades the rest.
+- `judgment` — must be read by a grader. If it requires user-specific taste
+  (voice, brand, design), the human is the only valid grader.
 
 Save the rubric to `references/quality-rubric.md` in the skill folder.
 
@@ -552,22 +558,29 @@ delegate Rounds 2-3.
 
 ### Phase 5 — Grade
 
-**Route by dimension tag** (set in Phase 2):
+**Route by `grading:` tag** (set on every dimension in Phase 2):
 
-- **`checkable` dimensions** — grade in-session. Use a script when one fits
-  (e.g. `grep -c "—"` for em-dash count); otherwise reason through with
-  `<thinking>` and produce a PASS/FAIL.
-- **`taste` dimensions** — **do not auto-grade**. Launch the eval-viewer
-  (see [references/advanced-eval.md](references/advanced-eval.md) §"Grade,
-  aggregate, launch viewer") so the user reviews each output in the browser
-  and writes notes into `feedback.json`. Their notes ARE the grade for taste
-  dimensions. Wait for them to finish before continuing the loop.
+- **`script`** — write/run a small checker (regex, word count, schema
+  validation) in-session. Save its output as evidence. No human needed.
+- **`hybrid`** — run the script half first to gate out obvious failures, then
+  reason through the remaining judgment portion with `<thinking>` and produce
+  PASS/FAIL with evidence. Document both halves in the grade.
+- **`judgment`** — depends on the criteria:
+  - Domain-neutral judgment (e.g. "heading hierarchy is logical", "JSON keys
+    follow consistent casing") → grade in-session with `<thinking>`.
+  - User-taste judgment (voice, brand, design, "sounds like me") → **do not
+    auto-grade**. Launch the eval-viewer (see
+    [references/advanced-eval.md](references/advanced-eval.md) §"Grade,
+    aggregate, launch viewer") so the user reviews outputs and writes notes
+    into `feedback.json`. Their notes ARE the grade. Wait for them to finish
+    before continuing the loop.
 
-If every dimension is `taste`, skip the auto-grade step entirely — go straight
-to eval-viewer and let the user drive. If every dimension is `checkable`,
-auto-grade and skip the viewer.
+If every dimension is user-taste judgment, skip the auto-grade step entirely
+and go straight to eval-viewer. If every dimension is `script`, auto-grade
+and skip the viewer. The mixed case (most skills) does both: script gates
+the cheap stuff, viewer captures the taste calls.
 
-For checkable dimensions, grade with `<thinking>` to reason before scoring:
+For script and in-session judgment grading, use `<thinking>` to reason before scoring:
 
 ```xml
 <thinking>
