@@ -476,47 +476,63 @@ Same as Step 1, plus these architect-specific questions:
 
 **Do this BEFORE writing any skill code.** The rubric is the foundation the entire loop grades against.
 
-Read [references/rubric-template.md](references/rubric-template.md) for the default format and adapt it to the specific skill.
+Read [references/rubric-template.md](references/rubric-template.md) for the full format and adapt it to the specific skill.
 
-A rubric has 4-6 weighted dimensions, each with explicit PASS/FAIL criteria:
+**A rubric has 4-6 weighted dimensions.** Each dimension belongs to one of
+three grading categories — Phase 5 routes by category:
+
+- `script` — a regex, word count, or schema check decides PASS/FAIL alone. No human or LLM judgment.
+- `hybrid` — a script catches the obvious failures; judgment grades the rest.
+- `judgment` — must be read by a grader. If it requires user-specific taste (voice, brand, design), the **human** is the only valid grader (route to eval-viewer in Phase 5). Domain-neutral judgment can be LLM-graded.
+
+The category can be expressed two ways and Phase 5 accepts either:
+
+1. **Preferred:** an explicit `grading: script | hybrid | judgment` field on
+   the dimension (machine-readable, clearest).
+2. **Acceptable:** the criteria text makes the category obvious — phrases like
+   "grep for X", "regex match", "word count between N and M" signal `script`;
+   "reads like the user's voice", "feels intentional" signal `judgment`.
+
+If a rubric uses option 2, Phase 5 will infer the category at grading time
+from the criteria text. Don't block on schema — block on whether the routing
+is unambiguous.
+
+Example using the preferred explicit tagging:
 
 ```yaml
 dimensions:
   - name: "Information Completeness"
     weight: 25
+    grading: hybrid
     pass: "All requested information present. Nothing missing or truncated."
     fail: "Missing sections, placeholder text, or incomplete content."
+    script_signals: "Grep for TODO/TBD/placeholder; check for sections listed in input."
 
   - name: "Structural Quality"
     weight: 20
+    grading: judgment
     pass: "Clear hierarchy, logical flow, appropriate sections."
     fail: "Flat structure, no visual hierarchy, walls of text."
 
   - name: "Distinctiveness"
     weight: 20
+    grading: judgment    # user-taste → routes to human via eval-viewer
     pass: "Would not be immediately identified as AI-generated."
     fail: "Generic template feel. Default fonts/colors. No design intent."
 
   - name: "Anti-Pattern Free"
     weight: 20
+    grading: script
     pass: "None of the documented anti-patterns are present."
     fail: "Contains one or more known anti-patterns."
+    script_signals: "Each anti-pattern in references/anti-patterns.md is a regex; run all."
 
   - name: "Cross-Run Consistency"
     weight: 15
+    grading: judgment
     pass: "Quality is similar across different inputs."
     fail: "Great on some inputs, terrible on others."
 ```
-
-**Tag every dimension `grading: script | hybrid | judgment`.** This is required —
-Phase 5 routes graders based on the tag. See "Who grades the output?" above for
-the full taxonomy and the example rubric in
-[references/rubric-template.md](references/rubric-template.md). Quick guide:
-
-- `script` — a regex, word count, or schema check decides PASS/FAIL alone.
-- `hybrid` — a script gates the obvious fails; judgment grades the rest.
-- `judgment` — must be read by a grader. If it requires user-specific taste
-  (voice, brand, design), the human is the only valid grader.
 
 Save the rubric to `references/quality-rubric.md` in the skill folder.
 
@@ -558,7 +574,13 @@ delegate Rounds 2-3.
 
 ### Phase 5 — Grade
 
-**Route by `grading:` tag** (set on every dimension in Phase 2):
+**Route by grading category.** For each dimension, determine its category:
+prefer the explicit `grading:` field if the rubric carries one; otherwise
+infer `script | hybrid | judgment` from the criteria text. If a dimension's
+category is ambiguous (you can't tell whether it's hybrid or pure judgment),
+treat it as `judgment` and route conservatively.
+
+The three routes:
 
 - **`script`** — write/run a small checker (regex, word count, schema
   validation) in-session. Save its output as evidence. No human needed.

@@ -88,11 +88,11 @@ Good criteria are:
 Bad criteria: "The output feels professional" (not observable, not binary)
 Good criteria: "The output uses a named font pairing from the approved list, not Inter/Roboto/system-ui" (observable, binary, specific)
 
-### Tag every dimension with `grading: script | hybrid | judgment`
+### Categorize every dimension as `script | hybrid | judgment`
 
-Every dimension MUST carry a `grading:` tag in the YAML — this is what Phase 5
-uses to route graders. See [rubric-template.md](rubric-template.md) §"Grading
-tags" for the full taxonomy.
+Every dimension belongs to one of three grading categories — Phase 5 routes
+by category. See [rubric-template.md](rubric-template.md) §"Grading tags"
+for the full taxonomy.
 
 - **`script`** — fully mechanical (regex, word count, schema check). Phase 5
   runs the script in-session, no human or LLM judgment.
@@ -106,8 +106,19 @@ tags" for the full taxonomy.
     Phase 5 routes these to the eval-viewer where the user writes notes into
     `feedback.json`. Never auto-grade user-taste dimensions.
 
-For `script` and `hybrid` dimensions, also add a `script_signals:` field
-listing the concrete checks the script will run.
+**Express the category** one of two ways:
+
+1. **Preferred:** explicit `grading: script | hybrid | judgment` field on the
+   dimension YAML, plus an optional `script_signals:` field listing the
+   concrete checks for `script` and `hybrid` dimensions.
+2. **Acceptable:** make the category obvious in the criteria text — phrases
+   like "grep for X", "regex match", "word count between N and M" signal
+   `script`; "reads like the user's voice", "feels intentional" signal
+   `judgment`.
+
+Phase 5 infers from criteria text when no explicit tag is present. Don't
+block on schema; block on whether the routing is unambiguous. If a
+dimension's category would be ambiguous to Phase 5, add the explicit tag.
 
 ## Pattern Extraction Guidelines
 

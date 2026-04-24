@@ -13,18 +13,25 @@ rubric:
   dimensions:
     - name: "[Dimension Name]"
       weight: [points]
-      grading: script | hybrid | judgment   # REQUIRED — see "Grading tags" below
+      grading: script | hybrid | judgment   # preferred; Phase 5 infers from criteria if absent
       pass: "[Observable, binary criteria for PASS]"
       fail: "[Observable, binary criteria for FAIL]"
       evidence_required: "[What the grader must cite]"
-      script_signals: |                      # optional; required if grading is script or hybrid
+      script_signals: |                      # for script / hybrid: list the concrete checks
         [Concrete checks the script will run — regex, word count, schema validation]
 ```
 
-## Grading tags (required on every dimension)
+## Grading tags
 
-The `grading:` tag tells Phase 5 of the architect loop how to grade the
-dimension. Every dimension must carry one of these three tags:
+Every dimension belongs to one of three grading categories. Phase 5 routes
+by category. The category can be expressed two ways:
+
+1. **Preferred:** explicit `grading:` field on the dimension YAML.
+2. **Acceptable:** the criteria text makes the category obvious (phrases
+   like "grep for X" / "word count between N and M" → `script`; "reads like
+   the user's voice" / "feels intentional" → `judgment`).
+
+The three categories:
 
 | Tag | Meaning | Examples |
 |---|---|---|
